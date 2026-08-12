@@ -1,0 +1,29 @@
+{
+  "areebah@digilatics.com": {
+    "role": "admin",
+    "name": "Areebah",
+    "username": "areebah",
+    "password_hash": "REPLACE_WITH_BCRYPT_HASH"
+  },
+  "khurram@digilatics.com": {
+    "role": "admin",
+    "name": "Khurram",
+    "username": "khurram",
+    "password_hash": "REPLACE_WITH_BCRYPT_HASH"
+  },
+  "some.lead@digilatics.com": {
+    "role": "lead",
+    "name": "Team Lead Name",
+    "username": "lead",
+    "teams": ["Automation", "Content"],
+    "identities": ["Team Lead Name", "some.lead@digilatics.com"],
+    "password_hash": "REPLACE_WITH_BCRYPT_HASH"
+  },
+  "hanan@digilatics.com": {
+    "role": "employee",
+    "name": "Hanan",
+    "username": "hanan",
+    "identities": ["Hanan", "hanan@digilatics.com"],
+    "password_hash": "REPLACE_WITH_BCRYPT_HASH"
+  }
+}

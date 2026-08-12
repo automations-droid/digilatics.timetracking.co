@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+service-account.json
+users.json
+pgdata/
+.pgdata/
+exports/
+*.xlsx
+.DS_Store
+cloudflared
+docker.tgz
+/tmp/

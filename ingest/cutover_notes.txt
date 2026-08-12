@@ -1,0 +1,22 @@
+Cutover: turn off n8n Sheet appends
+===================================
+
+After Postgres has history (sheet_import) and live syncs look healthy:
+
+1. In n8n, open "Client Time Tracking"
+   - Disable or disconnect the "Batch Append to Sheet1" node
+   - Or deactivate the whole workflow
+
+2. In n8n, open "Google Meet Time Syncs"
+   - Disable "Batch Append to Sheet2" / deactivate workflow
+
+3. Keep master client + employee directory sheets readable (gviz) until phase 2
+   moves them into Postgres.
+
+4. Verify dashboard at /login?as=areebah@digilatics.com and /api/sync/status
+
+Manual commands:
+  docker compose up -d --build
+  docker compose exec time python -m ingest.import_sheet
+  docker compose exec time python -m ingest.clickup
+  docker compose exec time python -m ingest.meet

@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: time
+      POSTGRES_PASSWORD: time
+      POSTGRES_DB: time
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U time -d time"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  time:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://time:time@db:5432/time
+      ENABLE_SCHEDULER: "true"
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:0.5b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./service-account.json:/app/service-account.json:ro
+      - ./users.json:/app/users.json
+      - ./clients.json:/app/clients.json
+      - ./static:/app/static:ro
+      - ./main.py:/app/main.py:ro
+      - ./settings_store.py:/app/settings_store.py:ro
+      - ./local_llm.py:/app/local_llm.py:ro
+      - ./identity_predict.py:/app/identity_predict.py:ro
+      - ./chat_assistant.py:/app/chat_assistant.py:ro
+      - ./db.py:/app/db.py:ro
+      - ./ingest:/app/ingest:ro
+      - ./scripts:/app/scripts:ro
+      - ./sheets_refs.py:/app/sheets_refs.py:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  ollama_data:
