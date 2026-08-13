@@ -65,37 +65,18 @@ DIGILATICS_BRANDS = (
     "Digilatics Sales",
 )
 
-SYSTEM_PROMPT = """You assign Digilatics time entries to the correct CLIENT from an allowed list.
+SYSTEM_PROMPT = """You are a proofreader for Digilatics time-entry CLIENT assignment.
 
-You are fixing time-tracking client attribution. Be precise.
+A heuristic already assigned a client. Your ONLY job: say if that assignment is correct.
 
-HARD RULES (in order):
-1. Pick EXACTLY one client from allowed_clients. Never invent a name.
-2. HR Activity / HR-related company events → "Digilatics HR and Finance"
-   (NOT the employee's personal fallback, NOT Digilatics Marketing).
-3. Titles about Web work (Web Case Studies, Web Team, Web sync) → "Digilatics Web"
-   even if attendees are from Content/Ads/etc.
-4. Inter-department INTERNAL meetings (titles like "Ads x Lead Insight x CSM Process",
-   "SEO x Content", team x team) are COMPANY-INTERNAL, not billable to an external client.
-   → assign EACH attendee's row to THAT person's Digilatics team brand = user_fallback
-   (e.g. Muhammad Umer Ibrahim / Ads → Digilatics Ads; CSM person → Digilatics CSM).
-   Do NOT pick an external client just because a word in the title overlaps a client name
-   (e.g. "Lead Insight" must NOT become "Insight Home Inspections").
-5. True external client meetings: client name is clearly the subject of the meeting
-   (e.g. "GreenWorks Location page Layout Discussion") → that external client.
-6. Generic internal meeting with no team named in title → user_fallback.
-7. Never use Digilatics Marketing as a dumping ground when a better Digilatics sub-brand fits.
-
-Examples:
-- "HR Activity - Digilatics" + any user → Digilatics HR and Finance
-- "Web Case Studies Discussion" + Content writer → Digilatics Web
-- "Web Team Sync Up" + Web member → Digilatics Web
-- "Ads x Lead Insight x CSM Process" + umar@ (Ads) → Digilatics Ads
-- "Ads x Lead Insight x CSM Process" + haseeb@ (CSM) → Digilatics CSM
-- "GreenWorks Location page Layout Discussion" → GreenWorks Inspections & Engineering
-
-Return ONLY compact JSON:
-{"client":"<exact allowed name>","confidence":0.0-1.0,"reason":"<short>"}
+HARD RULES:
+1. Reply ONLY JSON: {"ok":true|false,"client":"<exact allowed name>","confidence":0.0-1.0,"reason":"<short>"}
+2. If ok=true, set client to the same assigned_client (must be from allowed_clients).
+3. If ok=false, set client to the correct name from allowed_clients only — never invent names.
+4. Internal / inter-department titles (team x team, sync, standup, HR Activity, Web Team, etc.)
+   → Digilatics sub-brand or user_fallback — NOT an external client name collision.
+5. External client meetings: only when the client is clearly the subject of the title.
+6. Prefer keeping the heuristic assignment when unsure (ok=true, confidence moderate).
 """
 
 
@@ -157,9 +138,10 @@ def _client():
     return Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
-def claude_pick_client(
+def claude_proofread_client(
     *,
     title: str,
+    assigned_client: str,
     allowed_clients: list[str],
     user_fallback: str = "Digilatics",
     user_team: str = "",
@@ -167,76 +149,99 @@ def claude_pick_client(
     attendee_emails: Optional[list[str]] = None,
     description: str = "",
     source: str = "meeting",
-    heuristic_hint: str = "",
+    via: str = "",
 ) -> Optional[dict]:
+    """Ask Claude only whether the heuristic client assignment looks correct."""
     if not ENABLE_CLAUDE_MATCH:
         return None
     if not os.getenv("ANTHROPIC_API_KEY"):
-        log.warning("ANTHROPIC_API_KEY missing; skipping Claude match")
+        log.warning("ANTHROPIC_API_KEY missing; skipping Claude proofread")
+        return None
+
+    assigned = (assigned_client or "").strip()
+    if not assigned:
         return None
 
     allowed = _normalize_allowed(list(allowed_clients) + list(DIGILATICS_BRANDS))
     if user_fallback and user_fallback not in {a for a in allowed}:
         allowed.append(user_fallback)
     allowed_set = {a.lower(): a for a in allowed}
+    if assigned.lower() not in allowed_set:
+        allowed.append(assigned)
+        allowed_set[assigned.lower()] = assigned
 
     payload = {
         "title": title or "",
-        "description": (description or "")[:500],
+        "description": (description or "")[:400],
         "source": source,
+        "assigned_client": assigned,
+        "assigned_via": via,
         "user_fallback": user_fallback,
         "user_team": user_team,
         "user_email": user_email,
-        "attendee_emails": (attendee_emails or [])[:30],
-        "heuristic_hint": heuristic_hint,
-        "allowed_clients": allowed[:400],
+        "attendee_emails": (attendee_emails or [])[:20],
+        "allowed_clients": allowed[:300],
     }
 
     try:
         resp = _client().messages.create(
             model=CLAUDE_MODEL,
-            max_tokens=220,
+            max_tokens=160,
             temperature=0,
             system=SYSTEM_PROMPT,
             messages=[
                 {
                     "role": "user",
-                    "content": "Classify this time entry:\n" + json.dumps(payload, ensure_ascii=False),
+                    "content": "Proofread this client assignment:\n"
+                    + json.dumps(payload, ensure_ascii=False),
                 }
             ],
         )
-        text = "".join(getattr(b, "text", "") for b in resp.content if getattr(b, "type", "") == "text").strip()
+        text = "".join(
+            getattr(b, "text", "") for b in resp.content if getattr(b, "type", "") == "text"
+        ).strip()
         m = re.search(r"\{[\s\S]*\}", text)
         if not m:
-            log.warning("Claude returned non-JSON: %s", text[:200])
+            log.warning("Claude proofread non-JSON: %s", text[:200])
             return None
         data = json.loads(m.group(0))
+        ok = bool(data.get("ok"))
         client = str(data.get("client") or "").strip()
         conf = float(data.get("confidence") or 0)
         reason = str(data.get("reason") or "")
-        if not client:
-            return None
-        canon = allowed_set.get(client.lower())
-        if not canon:
-            log.info("Claude picked non-allowed client %r — ignored", client)
-            return None
-        if conf < CLAUDE_MIN_CONFIDENCE:
+        canon = allowed_set.get(client.lower()) if client else None
+        if ok:
             return {
-                "client": user_fallback or "Digilatics",
+                "ok": True,
+                "client": assigned,
                 "confidence": conf,
                 "reason": reason,
-                "via": "claude_low_conf",
+                "via": "claude_proofread_ok",
+            }
+        if not canon or conf < CLAUDE_MIN_CONFIDENCE:
+            return {
+                "ok": False,
+                "client": assigned,
+                "confidence": conf,
+                "reason": reason,
+                "via": "claude_proofread_keep",
                 "claude_client": canon,
             }
         return {
+            "ok": False,
             "client": canon,
             "confidence": conf,
             "reason": reason,
-            "via": "claude_haiku",
+            "via": "claude_proofread_fix",
         }
     except Exception as e:
-        log.exception("Claude match failed: %s", e)
+        log.exception("Claude proofread failed: %s", e)
         return None
+
+
+# Legacy name — matching no longer uses Claude to pick clients from scratch.
+def claude_pick_client(**kwargs) -> Optional[dict]:
+    return None
 
 
 def refine_match(
@@ -252,13 +257,14 @@ def refine_match(
     source: str = "meeting",
 ) -> dict:
     """
-    Apply priority overrides, then Claude for weak / internal-looking cases.
-    Can override a false title_exact (e.g. Insight Home vs Lead Insight interdept).
+    Heuristics own assignment. Claude ONLY proofreads the final client
+    (is it correct?) and may correct high-confidence mistakes.
+    Skips Claude for weak fallbacks and deterministic priority overrides.
     """
     result = dict(result or {})
     via = result.get("via") or ""
 
-    # 1) Deterministic priority (beats exact match)
+    # 1) Deterministic priority (beats exact match) — no Claude
     ov = priority_override(title, user_fallback)
     if ov:
         out = dict(result)
@@ -268,29 +274,39 @@ def refine_match(
         out["prev_client"] = result.get("client")
         return out
 
-    weak = via in {"fallback", "internal_fallback", "digilatics_override"}
-    # Re-ask Claude when an "exact" hit looks like an internal/interdept false positive
-    suspicious_exact = via in {"title_exact", "title_starts_with", "legacy_split", "title_fuzzy"} and looks_internal_meeting(
-        title
-    )
-    if not (weak or suspicious_exact):
+    # 2) Do not call Claude to invent clients for weak/fallback rows (saves cost)
+    weak = via in {"fallback", "internal_fallback", "digilatics_override", "claude_low_conf"}
+    if weak and not looks_internal_meeting(title):
+        return result
+
+    # 3) Proofread only when we have a concrete assignment worth checking
+    assigned = str(result.get("client") or "").strip()
+    if not assigned:
+        return result
+
+    # Skip proofread on already-deterministic brand/interdept vias
+    if via in {"title_brand_rule", "interdept_user_fallback"}:
         return result
 
     if not ENABLE_CLAUDE_MATCH:
         return result
 
-    hint = ""
-    if suspicious_exact:
-        hint = (
-            f"Previous heuristic said {result.get('client')} via {via}, but title looks "
-            "internal/inter-department — prefer Digilatics sub-brand / user_fallback over "
-            "external client name collision."
-        )
-    elif weak:
-        hint = f"Previous heuristic was weak ({via} → {result.get('client')})."
+    # Only proofread external-looking matches or suspicious internal collisions
+    worth_proofread = via in {
+        "title_exact",
+        "title_starts_with",
+        "legacy_split",
+        "title_fuzzy",
+        "domain_match",
+        "custom_field",
+        "description_exact",
+    } or looks_internal_meeting(title)
+    if not worth_proofread:
+        return result
 
-    picked = claude_pick_client(
+    reviewed = claude_proofread_client(
         title=title,
+        assigned_client=assigned,
         allowed_clients=allowed_clients,
         user_fallback=user_fallback,
         user_team=user_team,
@@ -298,24 +314,25 @@ def refine_match(
         attendee_emails=attendee_emails,
         description=description,
         source=source,
-        heuristic_hint=hint,
+        via=via,
     )
-    if not picked:
+    if not reviewed:
         return result
-    if picked.get("via") == "claude_low_conf":
-        out = dict(result)
-        out["claude_client"] = picked.get("claude_client")
-        out["claude_confidence"] = picked.get("confidence")
-        out["claude_reason"] = picked.get("reason")
-        return out
 
     out = dict(result)
-    out["client"] = picked["client"]
-    out["via"] = picked["via"]
-    out["confidence"] = picked.get("confidence")
-    out["reason"] = picked.get("reason")
-    out["prev_via"] = via
-    out["prev_client"] = result.get("client")
+    out["claude_reason"] = reviewed.get("reason")
+    out["claude_confidence"] = reviewed.get("confidence")
+    if reviewed.get("via") == "claude_proofread_fix" and reviewed.get("client"):
+        out["prev_client"] = assigned
+        out["prev_via"] = via
+        out["client"] = reviewed["client"]
+        out["via"] = reviewed["via"]
+        out["confidence"] = reviewed.get("confidence")
+        out["reason"] = reviewed.get("reason")
+    else:
+        out["via"] = via  # keep heuristic
+        if reviewed.get("via"):
+            out["proofread"] = reviewed.get("via")
     return out
 
 

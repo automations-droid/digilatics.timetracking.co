@@ -25,8 +25,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .sidebar-brand{display:flex;align-items:center;gap:12px;padding:0 18px;min-height:72px;height:72px;border-bottom:1px solid var(--border);box-sizing:border-box;}
 .sidebar-brand .brand-mark{width:38px;height:38px;background:#2a2621;border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(255,107,43,0.35);flex-shrink:0;overflow:hidden;}
 .sidebar-brand .brand-mark img,.sidebar-brand .brand-mark svg{width:22px;height:22px;display:block;object-fit:contain;}
-.login-mark{width:56px;height:56px;background:#2a2621;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 28px rgba(255,107,43,0.4);overflow:hidden;}
-.login-mark img,.login-mark svg{width:34px;height:34px;display:block;}
+.login-mark{width:56px;height:56px;background:#1a1a1a;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 0 20px;box-shadow:0 8px 20px rgba(255,107,43,.22);overflow:hidden;}
+.login-mark img,.login-mark svg{width:32px;height:32px;display:block;}
 .digi-toggle-wrap{display:flex;align-items:center;flex-shrink:0;}
 .digi-toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);transition:all .15s;}
 .digi-toggle:hover{border-color:rgba(255,107,43,.45);}
@@ -213,34 +213,63 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .dp-cancel-btn:hover{border-color:#8899bb;color:#4a5a78;}
 .dp-apply-btn{background:var(--accent);border:none;border-radius:9px;color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:8px 20px;cursor:pointer;box-shadow:0 2px 8px rgba(255,107,43,0.35);transition:all .15s;}
 .dp-apply-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,107,43,0.45);}
-/* ── Auth: sign-in gate ── */
-.login-screen{position:relative;isolation:isolate;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden;background:#070b14;}
-.login-bg{position:absolute;inset:0;z-index:0;pointer-events:none;}
-.login-bg canvas{display:block;width:100%;height:100%;}
-.login-card{position:relative;z-index:1;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,.07) 48%,rgba(255,255,255,.1) 100%);border:1px solid rgba(255,255,255,.28);border-radius:22px;box-shadow:0 8px 32px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.25) inset,0 -1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(255,107,43,.1);padding:40px 36px;max-width:400px;width:100%;text-align:center;color:#f4f7ff;backdrop-filter:blur(28px) saturate(1.35);-webkit-backdrop-filter:blur(28px) saturate(1.35);}
-.login-card::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.05) 28%,transparent 52%,rgba(255,107,43,.06) 100%);opacity:.9;}
-.login-card>*{position:relative;z-index:1;}
-.login-title{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px;color:#fff;}
-.login-sub{font-size:13px;color:rgba(220,230,255,.72);margin-bottom:22px;line-height:1.5;}
-.login-form{display:flex;flex-direction:column;gap:12px;text-align:left;}
-.login-form label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(180,198,230,.75);}
-.login-form input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:12px 14px;font-family:inherit;font-size:14px;color:#fff;outline:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-.login-form input::placeholder{color:rgba(200,214,240,.45);}
+/* ── Auth: half / half — login left, interactive stage right ── */
+.login-screen{
+  position:relative;isolation:isolate;min-height:100vh;overflow:hidden;color:#1a1a1a;
+  display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#f7f7f7;
+}
+.login-panel{
+  position:relative;z-index:2;min-height:100vh;background:#fff;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:48px clamp(28px,5vw,64px);box-sizing:border-box;
+  border-right:1px solid #ebebeb;
+}
+.login-panel-inner{width:100%;max-width:420px;text-align:left;animation:loginPanelIn .55s cubic-bezier(.22,1,.36,1) both;}
+@keyframes loginPanelIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.login-title{font-size:30px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;color:#141414;}
+.login-sub{font-size:14px;color:#6b6b6b;margin-bottom:28px;line-height:1.55;}
+.login-form{display:flex;flex-direction:column;gap:14px;text-align:left;}
+.login-form label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#8a8a8a;}
+.login-form input{width:100%;box-sizing:border-box;background:#fafafa;border:1px solid #e4e4e4;border-radius:12px;padding:14px 16px;font-family:inherit;font-size:15px;color:#1a1a1a;outline:none;transition:border-color .15s,box-shadow .15s,background .15s;}
+.login-form input::placeholder{color:#b0b0b0;}
 .login-pass-wrap{position:relative;}
-.login-pass-wrap input{padding-right:44px;}
-.login-pass-toggle{position:absolute;top:50%;right:10px;transform:translateY(-50%);border:none;background:transparent;color:rgba(200,214,240,.65);cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:8px;}
-.login-pass-toggle:hover{color:#fff;background:rgba(255,255,255,.1);}
+.login-pass-wrap input{padding-right:48px;}
+.login-pass-toggle{position:absolute;top:50%;right:12px;transform:translateY(-50%);border:none;background:transparent;color:#9a9a9a;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+.login-pass-toggle:hover{color:#1a1a1a;background:rgba(0,0,0,.05);}
 .login-pass-toggle svg{width:18px;height:18px;pointer-events:none;}
-.login-form input:focus{border-color:rgba(255,107,43,.75);background:rgba(255,255,255,.14);box-shadow:0 0 0 3px rgba(255,107,43,.18);}
-.login-submit{margin-top:4px;width:100%;border:none;border-radius:12px;padding:13px 18px;font-family:inherit;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b2b,#ff8f4a);cursor:pointer;box-shadow:0 8px 24px rgba(255,107,43,.28);}
-.login-submit:hover{filter:brightness(1.05);}
-.login-submit:disabled{opacity:.6;cursor:wait;}
-.login-btn{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:12px 22px;font-family:inherit;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s;text-decoration:none;}
-.login-btn:hover{border-color:rgba(255,107,43,0.6);background:rgba(255,255,255,.16);transform:translateY(-1px);}
-.login-btn svg{width:18px;height:18px;}
-.login-err{margin-top:14px;font-size:12px;color:#fca5a5;min-height:16px;}
-.login-foot{margin-top:26px;font-size:11px;color:rgba(180,198,230,.55);}
-@media (prefers-reduced-motion:reduce){.login-bg{opacity:.75;}}
+.login-form input:focus{border-color:#ff6b2b;background:#fff;box-shadow:0 0 0 3px rgba(255,107,43,.16);}
+.login-submit{margin-top:8px;width:100%;border:none;border-radius:12px;padding:15px 18px;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b2b,#ff8f4a);cursor:pointer;box-shadow:0 10px 24px rgba(255,107,43,.28);transition:transform .15s,filter .15s;}
+.login-submit:hover{filter:brightness(1.04);transform:translateY(-1px);}
+.login-submit:disabled{opacity:.6;cursor:wait;transform:none;}
+.login-err{margin-top:14px;font-size:12px;color:#d64545;min-height:16px;}
+.login-foot{margin-top:28px;font-size:12px;color:#9a9a9a;line-height:1.45;}
+
+.login-stage{
+  position:relative;min-height:100vh;overflow:hidden;background:#f2f2f2;
+  display:flex;align-items:center;justify-content:center;
+  cursor:crosshair;user-select:none;
+}
+.login-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none;}
+.login-stage-hint{
+  position:absolute;z-index:3;left:50%;bottom:28px;transform:translateX(-50%);
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#9a9a9a;pointer-events:none;opacity:.85;
+}
+@media (max-width:900px){
+  .login-screen{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  .login-panel{min-height:auto;border-right:none;border-bottom:1px solid #ebebeb;padding:36px 24px 28px;order:2;}
+  .login-stage{min-height:42vh;order:1;}
+  .login-stage-hint{bottom:14px;}
+  .login-panel-inner{max-width:520px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .login-panel-inner{animation:none;}
+}
+body.hide-clients #tbody-team tr td:last-child,
+body.hide-clients #tbody-space tr td:last-child,
+body.hide-clients #tbody-employee tr td:last-child{display:none;}
+.coming-soon-card .coming-soon-body{min-height:160px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);}
+.coming-soon-inline{color:var(--text3);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 /* ── Header user chip ── */
 .user-chip{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:5px 6px 5px 12px;}
 .user-chip .uc-meta{display:flex;flex-direction:column;line-height:1.15;flex:1;min-width:0;}
@@ -566,7 +595,7 @@ tbody td{padding:11px 14px;color:var(--text2);}
             <div class="uc-avatar" id="ucAvatar"></div>
           </div>
         </div>
-        <a class="sidebar-logout" id="logoutBtn" href="/logout" title="Sign out">
+        <a class="sidebar-logout" id="logoutBtn" href="/logout" title="Sign out" onclick="doLogout(event)">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6"/></svg>
           Sign out
         </a>
@@ -670,6 +699,23 @@ const SHEET_ID='1Aw7efJ_Z0VHiHH9iR2cm-HsP2OA_4hQCxeekSimSasY';
 const SHEET_NAME='Sheet1';
 const TZ='America/New_York';
 let ME=null; // {email,name,role,teams} — set by boot()
+/** Admin-only for now: leads/employees see Coming soon instead of client analytics. */
+function canSeeClients(){ return !!(ME && ME.role==='admin'); }
+function isTaskSource(src){ return src==='clickup' || src==='google_task'; }
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function safeUrl(u){const s=String(u||'').trim();if(!s)return '';try{const x=new URL(s,location.origin);if(x.protocol==='http:'||x.protocol==='https:')return x.href;}catch(e){}return '';}
+function taskLinkHtml(r){const label=esc(r.Task||'-');const u=safeUrl(r.Url);return u?'<a class="task-link" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+label+' &#8599;</a>':label;}
+function getCsrfToken(){const m=document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);if(m)try{return decodeURIComponent(m[1]);}catch(e){return m[1];}return (ME&&ME.csrf)||'';}
+async function apiFetch(url,opts={}){const options=Object.assign({credentials:'same-origin'},opts);const headers=new Headers(options.headers||{});const method=String(options.method||'GET').toUpperCase();if(method!=='GET'&&method!=='HEAD'&&method!=='OPTIONS'){const t=getCsrfToken();if(t)headers.set('X-CSRF-Token',t);}options.headers=headers;return fetch(url,options);}
+async function doLogout(e){if(e)e.preventDefault();try{await apiFetch('/api/logout',{method:'POST'});}catch(_){ }location.href='/';}
+function hardenRows(rows){return (rows||[]).map(r=>{const o=Object.assign({},r);if(o.Url)o.Url=safeUrl(o.Url);return o;});}
+function syncClientVisibility(){
+  const show=canSeeClients();
+  document.body.classList.toggle('hide-clients', !show);
+}
+function comingSoonBlock(title, sub){
+  return '<div class="chart-card coming-soon-card"><div class="chart-card-header"><div><div class="chart-title">'+title+'</div><div class="chart-sub">'+(sub||'Client analytics')+'</div></div></div><div class="coming-soon-body">Coming soon</div></div>';
+}
 const PALETTE=['#ff6b2b','#4a9eff','#ffaa4d','#a78bfa','#34d399','#f87171','#60a5fa','#fbbf24','#e879f9','#2dd4bf'];
 let allData=[],myData=[],charts={},activePeriod='week',currentNav='mytime',liveToday=null;
 let includeDigilatics=(()=>{try{return localStorage.getItem('includeDigilatics')!=='0';}catch(e){return true;}})();
@@ -725,7 +771,7 @@ function taskKey(r){
 // Count unique task IDs from a set of rows (only clickup source counts as tasks)
 function uniqueTaskCount(rows){
   const s=new Set();
-  rows.forEach(r=>{if(r.Source==='clickup') s.add(taskKey(r));});
+  rows.forEach(r=>{if(isTaskSource(r.Source)) s.add(taskKey(r));});
   return s.size;
 }
 
@@ -783,9 +829,9 @@ function exportExcel(){
 
   // ── Compute aggregates ──
   const totalH=data.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
-  const taskH=data.filter(r=>r.Source==='clickup').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
+  const taskH=data.filter(r=>isTaskSource(r.Source)).reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const meetH=data.filter(r=>r.Source==='meeting').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
-  const tasksCount=data.filter(r=>r.Source==='clickup').length;
+  const tasksCount=data.filter(r=>isTaskSource(r.Source)).length;
   const meetCount=data.filter(r=>r.Source==='meeting').length;
   const clientHours=groupSum(data,'Client');
   const userHours=groupSum(data,'User');
@@ -911,7 +957,7 @@ function exportExcel(){
       su(r.User)||r.User||'',
       parseFloat(r.Hours||0),
       Math.round(parseFloat(r.Hours||0)*60),
-      r.Source==='clickup'?'Task':r.Source==='meeting'?'Meeting':r.Source||'',
+      isTaskSource(r.Source)?'Task':r.Source==='meeting'?'Meeting':r.Source||'',
       r.Space&&r.Space!=='-'?r.Space:'',
       r.Team||'',
       r.Url||r.URL||r.url||''
@@ -933,10 +979,10 @@ function exportExcel(){
   // ════════════════════════════════════════════════════════════════
   const clientRows=Object.entries(clientHours).sort((a,b)=>b[1]-a[1]).map(([c,h])=>{
     const cd=data.filter(r=>r.Client===c);
-    const tH=cd.filter(r=>r.Source==='clickup').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
+    const tH=cd.filter(r=>isTaskSource(r.Source)).reduce((s,r)=>s+parseFloat(r.Hours||0),0);
     const mH=cd.filter(r=>r.Source==='meeting').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
     const members=new Set(cd.map(r=>r.User).filter(Boolean)).size;
-    const tasks=cd.filter(r=>r.Source==='clickup').length;
+    const tasks=cd.filter(r=>isTaskSource(r.Source)).length;
     const meetings=cd.filter(r=>r.Source==='meeting').length;
     // Team-wise hours breakdown (sorted by hours desc, rounded to 2 decimals)
     const teamMap={};
@@ -961,7 +1007,7 @@ function exportExcel(){
   // ════════════════════════════════════════════════════════════════
   const memberRows=Object.entries(userHours).sort((a,b)=>b[1]-a[1]).map(([u,h])=>{
     const ud=data.filter(r=>r.User===u);
-    const tH=ud.filter(r=>r.Source==='clickup').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
+    const tH=ud.filter(r=>isTaskSource(r.Source)).reduce((s,r)=>s+parseFloat(r.Hours||0),0);
     const mH=ud.filter(r=>r.Source==='meeting').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
     const clients=new Set(ud.map(r=>r.Client).filter(Boolean)).size;
     const days=new Set(ud.map(r=>r._date).filter(Boolean)).size;
@@ -986,7 +1032,7 @@ function exportExcel(){
   const teamHours=groupSum(data,'Team');
   const teamRows=Object.entries(teamHours).sort((a,b)=>b[1]-a[1]).map(([t,h])=>{
     const td=data.filter(r=>r.Team===t);
-    const tH=td.filter(r=>r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0);
+    const tH=td.filter(r=>isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0);
     const mH=td.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);
     const clients=new Set(td.map(r=>r.Client).filter(Boolean)).size;
     const members=new Set(td.map(r=>r.User).filter(Boolean)).size;
@@ -1009,7 +1055,7 @@ function exportExcel(){
   // ════════════════════════════════════════════════════════════════
   const spaceRows=Object.entries(spaceHours).sort((a,b)=>b[1]-a[1]).map(([s,h])=>{
     const sd=data.filter(r=>r.Space===s);
-    const tH=sd.filter(r=>r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0);
+    const tH=sd.filter(r=>isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0);
     const mH=sd.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);
     const clients=new Set(sd.map(r=>r.Client).filter(Boolean)).size;
     const members=new Set(sd.map(r=>r.User).filter(Boolean)).size;
@@ -1073,8 +1119,9 @@ function utilBar(hours,days){
 function wDays(data){return Math.max([...new Set(data.map(r=>r._date).filter(Boolean))].length,1);}
 function groupSum(data,key){return data.reduce((a,r)=>{const k=r[key]||'Unknown';a[k]=(a[k]||0)+parseFloat(r.Hours||0);return a;},{});}
 function sortObj(obj,dir){return Object.entries(obj).sort((a,b)=>dir==='asc'?a[1]-b[1]:b[1]-a[1]);}
-function applySrc(data,src){if(src==='task')return data.filter(r=>r.Source==='clickup');if(src==='meeting')return data.filter(r=>r.Source==='meeting');return data;}
-function escQ(html){return html.replace(/"/g,'&quot;');}
+function applySrc(data,src){if(src==='task')return data.filter(r=>isTaskSource(r.Source));if(src==='meeting')return data.filter(r=>r.Source==='meeting');return data;}
+/** Attribute escape for data-tip HTML (keeps intentional tags; escapes " &). */
+function escQ(s){return String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');}
 function fmtDate(d){return d?new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'-';}
 
 function toggleTheme(){
@@ -1136,7 +1183,10 @@ function buildDatePickerHtml(opts){
 }
 
 function buildControlsBar(){
-  return '<div class="controls-bar"><div class="filter-bar"><div class="fb-group" id="fbg-team" onclick="toggleFbDrop(\'team\',event)"><span class="fb-val" id="fbv-team">🏢 All Teams</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-team"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-team" placeholder="Search teams..." oninput="filterFbOpts(\'team\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-team"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-space" onclick="toggleFbDrop(\'space\',event)"><span class="fb-val" id="fbv-space">🗂️ All Spaces</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-space"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-space" placeholder="Search spaces..." oninput="filterFbOpts(\'space\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-space"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-client" onclick="toggleFbDrop(\'client\',event)"><span class="fb-val" id="fbv-client">💼 All Clients</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-client"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-client" placeholder="Search clients..." oninput="filterFbOpts(\'client\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-client"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-user" onclick="toggleFbDrop(\'user\',event)"><span class="fb-val" id="fbv-user">👤 All Members</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-user"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-user" placeholder="Search members..." oninput="filterFbOpts(\'user\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-user"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-source" onclick="toggleFbDrop(\'source\',event)"><span class="fb-val" id="fbv-source">📡 All Sources</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-source"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-source" placeholder="Search..." oninput="filterFbOpts(\'source\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-source"></div></div></div><button class="fb-reset" onclick="resetFilters()"><span class="fb-reset-x">✕</span> Reset</button></div>'+buildDatePickerHtml()+'</div>';
+  const clientFilter=canSeeClients()
+    ? '<div class="fb-divider"></div><div class="fb-group" id="fbg-client" onclick="toggleFbDrop(\'client\',event)"><span class="fb-val" id="fbv-client">💼 All Clients</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-client"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-client" placeholder="Search clients..." oninput="filterFbOpts(\'client\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-client"></div></div></div>'
+    : '<!-- client filter hidden for lead/employee — Coming soon -->';
+  return '<div class="controls-bar"><div class="filter-bar"><div class="fb-group" id="fbg-team" onclick="toggleFbDrop(\'team\',event)"><span class="fb-val" id="fbv-team">🏢 All Teams</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-team"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-team" placeholder="Search teams..." oninput="filterFbOpts(\'team\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-team"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-space" onclick="toggleFbDrop(\'space\',event)"><span class="fb-val" id="fbv-space">🗂️ All Spaces</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-space"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-space" placeholder="Search spaces..." oninput="filterFbOpts(\'space\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-space"></div></div></div>'+clientFilter+'<div class="fb-divider"></div><div class="fb-group" id="fbg-user" onclick="toggleFbDrop(\'user\',event)"><span class="fb-val" id="fbv-user">👤 All Members</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-user"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-user" placeholder="Search members..." oninput="filterFbOpts(\'user\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-user"></div></div></div><div class="fb-divider"></div><div class="fb-group" id="fbg-source" onclick="toggleFbDrop(\'source\',event)"><span class="fb-val" id="fbv-source">📡 All Sources</span><span class="fb-arrow">▾</span><div class="fb-dropdown" id="fbd-source"><div class="fb-search-wrap"><span class="fb-search-icon">🔍</span><input class="fb-search" id="fbs-source" placeholder="Search..." oninput="filterFbOpts(\'source\')" onclick="event.stopPropagation()"></div><div class="fb-opts" id="fbo-source"></div></div></div><button class="fb-reset" onclick="resetFilters()"><span class="fb-reset-x">✕</span> Reset</button></div>'+buildDatePickerHtml()+'</div>';
 }
 function mapRows(raw){
   return raw.map(r=>{r._date=parseDate(r.Date);return r;})
@@ -1222,7 +1272,7 @@ function fmtLiveH(h){const n=parseFloat(h||0);if(!n)return '0h';const hrs=Math.f
 async function loadLiveToday(force){
   try{
     const url='/api/live/today'+(force?'?force=1':'');
-    const res=await fetch(url,{credentials:'same-origin'});
+    const res=await apiFetch(url,{credentials:'same-origin'});
     if(!res.ok)return;
     liveToday=await res.json();
     if(currentNav==='mytime'){
@@ -1277,7 +1327,7 @@ async function refreshAll(){
 /* ── Load Active Timers ── */
 async function loadActiveTimers(){
   try{
-    const res=await fetch('/api/active-timers',{credentials:'same-origin'});
+    const res=await apiFetch('/api/active-timers',{credentials:'same-origin'});
     if(!res.ok)throw new Error('timers '+res.status);
     activeTimerData=(await res.json())
       .filter(r=>r.User&&r.User!=='No active timers'&&r.User!=='-');
@@ -1291,15 +1341,15 @@ async function loadActiveTimers(){
 async function loadData(){
   document.getElementById('content').innerHTML='<div class="loading"><div class="spinner"></div>Loading your data...</div>';
   try{
-    const myRes=await fetch('/api/my-data',{credentials:'same-origin'});
+    const myRes=await apiFetch('/api/my-data',{credentials:'same-origin'});
     if(myRes.status===401){showLogin();return;}
     if(!myRes.ok)throw new Error('my-data '+myRes.status);
-    myData=mapRows(await myRes.json());
+    myData=mapRows(hardenRows(await myRes.json()));
 
     if(ME&&ME.role!=='employee'){
-      const res=await fetch('/api/data',{credentials:'same-origin'});
+      const res=await apiFetch('/api/data',{credentials:'same-origin'});
       if(!res.ok)throw new Error('data '+res.status);
-      allData=mapRows(await res.json());
+      allData=mapRows(hardenRows(await res.json()));
     }else{
       allData=myData;
     }
@@ -1328,7 +1378,7 @@ function renderCurrentView(){
 /* ── Auth boot ── */
 async function boot(){
   try{
-    const res=await fetch('/api/me',{credentials:'same-origin'});
+    const res=await apiFetch('/api/me',{credentials:'same-origin'});
     if(res.status===401){showLogin();return;}
     ME=await res.json();
   }catch(e){showLogin();return;}
@@ -1338,6 +1388,7 @@ async function boot(){
   document.getElementById('ucName').textContent=ME.name||su(ME.email);
   const roleEl=document.getElementById('ucRole');
   roleEl.textContent=ME.role;roleEl.className='uc-role '+ME.role;
+  syncClientVisibility();
   document.getElementById('ucAvatar').textContent=(ME.name||ME.email||'?').trim().charAt(0).toUpperCase();
   if(sidebarUser)sidebarUser.style.display='flex';
   const access=document.getElementById('sidebarAccess');
@@ -1364,58 +1415,44 @@ function stopLoginBg(){
   window.__loginBgStop=null;
 }
 
-function startLoginBg(root){
+function startLoginStage(root){
   stopLoginBg();
-  const wrap=root.querySelector('.login-bg');
-  const canvas=wrap?.querySelector('canvas');
-  if(!canvas||!wrap) return;
+  const stage=root.querySelector('.login-stage');
+  const canvas=stage?.querySelector('canvas');
+  if(!stage||!canvas) return;
   const ctx=canvas.getContext('2d');
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let w=0,h=0,dpr=1,raf=0,t0=performance.now();
-  const mouse={x:0,y:0,tx:0,ty:0};
+  const mouse={x:0.5,y:0.5,tx:0.5,ty:0.5};
+  const grains=[];
+  const sparks=[];
 
-  // Distributed field — looks complete even with the card covering the center
-  const rings=[];
-  const particles=[];
-  const arcs=[];
   function seed(){
-    rings.length=0;particles.length=0;arcs.length=0;
-    const dens=Math.max(8, Math.round((w*h)/140000));
-    for(let i=0;i<dens;i++){
-      rings.push({
+    grains.length=0;sparks.length=0;
+    const n=Math.max(36, Math.round((w*h)/14000));
+    for(let i=0;i<n;i++){
+      grains.push({
         x:Math.random(), y:Math.random(),
-        r:40+Math.random()*120,
-        spin:(Math.random()-.5)*0.35,
+        r:1.2+Math.random()*2.6,
+        vy:0.04+Math.random()*0.12,
+        vx:(Math.random()-0.5)*0.03,
+        a:0.25+Math.random()*0.55,
+      });
+    }
+    for(let i=0;i<14;i++){
+      sparks.push({
+        x:0.2+Math.random()*0.6,
+        y:0.2+Math.random()*0.6,
+        r:22+Math.random()*90,
+        speed:0.2+Math.random()*0.55,
         phase:Math.random()*Math.PI*2,
-        thick:1+Math.random()*1.6,
-        tint:Math.random()>.55?0:1 // 0 orange, 1 blue
-      });
-    }
-    for(let i=0;i<Math.round(dens*4.5);i++){
-      particles.push({
-        x:Math.random(), y:Math.random(),
-        z:0.3+Math.random()*0.7,
-        vx:(Math.random()-.5)*0.012,
-        vy:(Math.random()-.5)*0.012,
-        size:1+Math.random()*2.2,
-        tint:Math.random()>.6?0:1
-      });
-    }
-    for(let i=0;i<Math.max(5, dens-2);i++){
-      arcs.push({
-        x:Math.random(), y:Math.random(),
-        r:50+Math.random()*160,
-        a0:Math.random()*Math.PI*2,
-        span:0.6+Math.random()*1.4,
-        speed:(Math.random()-.5)*0.55,
-        tint:Math.random()>.5?0:1
       });
     }
   }
 
   function resize(){
-    dpr=Math.min(window.devicePixelRatio||1,2);
-    w=wrap.clientWidth;h=wrap.clientHeight;
+    dpr=Math.min(window.devicePixelRatio||1, 2);
+    w=stage.clientWidth; h=stage.clientHeight;
     canvas.width=Math.floor(w*dpr);
     canvas.height=Math.floor(h*dpr);
     canvas.style.width=w+'px';
@@ -1425,143 +1462,72 @@ function startLoginBg(root){
   }
 
   function onMove(e){
-    const r=root.getBoundingClientRect();
-    mouse.tx=((e.clientX-r.left)/Math.max(r.width,1)-0.5)*24;
-    mouse.ty=((e.clientY-r.top)/Math.max(r.height,1)-0.5)*18;
+    const r=stage.getBoundingClientRect();
+    mouse.tx=(e.clientX-r.left)/Math.max(r.width,1);
+    mouse.ty=(e.clientY-r.top)/Math.max(r.height,1);
   }
-  function onLeave(){mouse.tx=0;mouse.ty=0;}
+  function onLeave(){ mouse.tx=0.5; mouse.ty=0.5; }
 
   function frame(now){
     raf=requestAnimationFrame(frame);
     const t=(now-t0)/1000;
-    mouse.x+=(mouse.tx-mouse.x)*0.06;
-    mouse.y+=(mouse.ty-mouse.y)*0.06;
-    const mx=mouse.x, my=mouse.y;
+    mouse.x+=(mouse.tx-mouse.x)*0.08;
+    mouse.y+=(mouse.ty-mouse.y)*0.08;
+    const mx=(mouse.x-0.5), my=(mouse.y-0.5);
 
-    const bg=ctx.createLinearGradient(0,0,w,h);
-    bg.addColorStop(0,'#070b14');
-    bg.addColorStop(0.45,'#0d1524');
-    bg.addColorStop(1,'#101a2c');
-    ctx.fillStyle=bg;
-    ctx.fillRect(0,0,w,h);
+    ctx.clearRect(0,0,w,h);
 
-    // soft ambient washes — no single focal point
-    const wash1=ctx.createRadialGradient(w*0.18+mx, h*0.28+my, 0, w*0.18+mx, h*0.28+my, w*0.45);
-    wash1.addColorStop(0,'rgba(74,158,255,0.14)');
-    wash1.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=wash1; ctx.fillRect(0,0,w,h);
-    const wash2=ctx.createRadialGradient(w*0.82+mx*0.6, h*0.7+my*0.6, 0, w*0.82+mx*0.6, h*0.7+my*0.6, w*0.42);
-    wash2.addColorStop(0,'rgba(255,107,43,0.16)');
-    wash2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=wash2; ctx.fillRect(0,0,w,h);
-    const wash3=ctx.createRadialGradient(w*0.55-mx, h*0.15-my, 0, w*0.55-mx, h*0.15-my, w*0.3);
-    wash3.addColorStop(0,'rgba(255,170,77,0.08)');
-    wash3.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=wash3; ctx.fillRect(0,0,w,h);
+    const wash=ctx.createRadialGradient(mouse.x*w, mouse.y*h, 0, mouse.x*w, mouse.y*h, Math.max(w,h)*0.55);
+    wash.addColorStop(0,'rgba(255,107,43,0.18)');
+    wash.addColorStop(0.45,'rgba(255,170,77,0.07)');
+    wash.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=wash; ctx.fillRect(0,0,w,h);
 
-    // isometric time-grid (even density across viewport)
-    const cell=56;
-    const ox=(t*(reduce?0:8)+mx*0.4)%cell;
-    const oy=(t*(reduce?0:5)-my*0.3)%cell;
-    ctx.strokeStyle='rgba(120,150,200,0.07)';
-    ctx.lineWidth=1;
-    for(let x=-cell;x<w+cell;x+=cell){
+    sparks.forEach((s,i)=>{
+      const cx=s.x*w + mx*28;
+      const cy=s.y*h + my*20;
+      const a=s.phase+(reduce?0:t*s.speed);
       ctx.beginPath();
-      ctx.moveTo(x+ox,0); ctx.lineTo(x+ox+h*0.35,h);
-      ctx.stroke();
-    }
-    for(let y=-cell;y<h+cell;y+=cell){
-      ctx.beginPath();
-      ctx.moveTo(0,y+oy); ctx.lineTo(w,y+oy+w*0.08);
-      ctx.stroke();
-    }
-
-    // floating rings scattered everywhere
-    rings.forEach(r=>{
-      const cx=r.x*w+mx*(0.4+r.r/200)+Math.sin(t*r.spin+r.phase)*10;
-      const cy=r.y*h+my*(0.35+r.r/220)+Math.cos(t*r.spin*0.8+r.phase)*8;
-      const rot=r.phase+(reduce?0:t*r.spin);
-      ctx.save();
-      ctx.translate(cx,cy);
-      ctx.rotate(rot*0.4);
-      ctx.scale(1,0.55+Math.sin(rot)*0.08);
-      ctx.beginPath();
-      ctx.arc(0,0,r.r,0,Math.PI*2);
-      ctx.strokeStyle=r.tint?`rgba(74,158,255,0.18)`:`rgba(255,107,43,0.2)`;
-      ctx.lineWidth=r.thick;
-      ctx.stroke();
-      // tick marks like mini clocks — ornamental, not a hero
-      for(let i=0;i<8;i++){
-        const a=(i/8)*Math.PI*2;
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(a)*r.r*0.88, Math.sin(a)*r.r*0.88);
-        ctx.lineTo(Math.cos(a)*r.r, Math.sin(a)*r.r);
-        ctx.strokeStyle=r.tint?`rgba(74,158,255,0.22)`:`rgba(255,170,77,0.28)`;
-        ctx.lineWidth=1.2;
-        ctx.stroke();
-      }
-      ctx.restore();
-    });
-
-    // sweeping arcs
-    arcs.forEach(a=>{
-      const cx=a.x*w+mx*0.5;
-      const cy=a.y*h+my*0.4;
-      const a0=a.a0+(reduce?0:t*a.speed);
-      ctx.beginPath();
-      ctx.ellipse(cx,cy,a.r,a.r*0.42,a0*0.2,a0,a0+a.span);
-      ctx.strokeStyle=a.tint?`rgba(74,158,255,0.35)`:`rgba(255,107,43,0.4)`;
-      ctx.lineWidth=1.8;
+      ctx.ellipse(cx, cy, s.r, s.r*0.42, a*0.35, a, a+Math.PI*1.2);
+      ctx.strokeStyle=i%2? 'rgba(255,107,43,0.3)' : 'rgba(26,26,26,0.14)';
+      ctx.lineWidth=1.6;
       ctx.lineCap='round';
       ctx.stroke();
     });
 
-    // drifting particles / hour nodes
-    particles.forEach(p=>{
+    grains.forEach(g=>{
       if(!reduce){
-        p.x=(p.x+p.vx*0.015+1)%1;
-        p.y=(p.y+p.vy*0.015+1)%1;
+        g.y+=g.vy*0.01;
+        g.x+=g.vx*0.01 + mx*0.002;
+        if(g.y>1.05){ g.y=-0.05; g.x=Math.random(); }
       }
-      const px=p.x*w+mx*p.z*0.8;
-      const py=p.y*h+my*p.z*0.6;
-      const s=p.size*p.z;
+      const px=g.x*w + mx*10;
+      const py=g.y*h + my*6;
       ctx.beginPath();
-      ctx.arc(px,py,s,0,Math.PI*2);
-      ctx.fillStyle=p.tint
-        ?`rgba(120,180,255,${0.25+p.z*0.35})`
-        :`rgba(255,130,70,${0.28+p.z*0.4})`;
+      ctx.arc(px, py, g.r, 0, Math.PI*2);
+      ctx.fillStyle='rgba(255,107,43,'+g.a+')';
       ctx.fill();
     });
 
-    // subtle connection lines between nearby particles (constellation feel)
+    ctx.strokeStyle='rgba(26,26,26,0.12)';
     ctx.lineWidth=1;
-    for(let i=0;i<particles.length;i++){
-      const a=particles[i];
-      const ax=a.x*w+mx*a.z*0.8, ay=a.y*h+my*a.z*0.6;
-      for(let j=i+1;j<Math.min(i+6,particles.length);j++){
-        const b=particles[j];
-        const bx=b.x*w+mx*b.z*0.8, by=b.y*h+my*b.z*0.6;
-        const dx=ax-bx, dy=ay-by;
-        const dist=Math.hypot(dx,dy);
-        if(dist<110){
-          ctx.strokeStyle=`rgba(160,190,230,${0.08*(1-dist/110)})`;
-          ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-        }
-      }
-    }
+    ctx.beginPath();
+    ctx.moveTo(mouse.x*w-18, mouse.y*h); ctx.lineTo(mouse.x*w+18, mouse.y*h);
+    ctx.moveTo(mouse.x*w, mouse.y*h-18); ctx.lineTo(mouse.x*w, mouse.y*h+18);
+    ctx.stroke();
   }
 
   resize();
-  root.addEventListener('pointermove',onMove);
-  root.addEventListener('pointerleave',onLeave);
-  window.addEventListener('resize',resize);
+  stage.addEventListener('pointermove', onMove);
+  stage.addEventListener('pointerleave', onLeave);
+  window.addEventListener('resize', resize);
   raf=requestAnimationFrame(frame);
 
   window.__loginBgStop=()=>{
     cancelAnimationFrame(raf);
-    root.removeEventListener('pointermove',onMove);
-    root.removeEventListener('pointerleave',onLeave);
-    window.removeEventListener('resize',resize);
+    stage.removeEventListener('pointermove', onMove);
+    stage.removeEventListener('pointerleave', onLeave);
+    window.removeEventListener('resize', resize);
   };
 }
 
@@ -1573,28 +1539,34 @@ function showLogin(){
   const err=params.get('error')?'You don\u2019t have access. Contact your admin.':'';
   const el=document.createElement('div');
   el.className='login-screen';el.id='loginScreen';
-  el.innerHTML='<div class="login-bg" aria-hidden="true"><canvas></canvas></div>'+
-    '<div class="login-card">'+
-    '<div class="login-mark"><img src="/logo.svg" alt="Digilatics"></div>'+
-    '<div class="login-title">Digilatics</div>'+
-    '<div class="login-sub">Time Intelligent Dashboard · Sign in with your username and password.</div>'+
-    '<form class="login-form" id="loginForm">'+
-      '<div><label for="loginUser">Username</label><input id="loginUser" name="username" autocomplete="username" required placeholder="username or email"></div>'+
-      '<div><label for="loginPass">Password</label>'+
-        '<div class="login-pass-wrap">'+
-          '<input id="loginPass" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">'+
-          '<button type="button" class="login-pass-toggle" id="loginPassToggle" aria-label="Show password" title="Show password">'+
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'+
-          '</button>'+
-        '</div>'+
+  el.innerHTML=
+    '<div class="login-panel">'+
+      '<div class="login-panel-inner">'+
+        '<div class="login-mark"><img src="/logo.svg" alt="Digilatics"></div>'+
+        '<div class="login-title">Welcome back</div>'+
+        '<div class="login-sub">Sign in to Digilatics Time Intelligence with your username and password.</div>'+
+        '<form class="login-form" id="loginForm">'+
+          '<div><label for="loginUser">Username</label><input id="loginUser" name="username" autocomplete="username" required placeholder="username or email"></div>'+
+          '<div><label for="loginPass">Password</label>'+
+            '<div class="login-pass-wrap">'+
+              '<input id="loginPass" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">'+
+              '<button type="button" class="login-pass-toggle" id="loginPassToggle" aria-label="Show password" title="Show password">'+
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
+          '<button class="login-submit" type="submit" id="loginSubmit">Sign in</button>'+
+        '</form>'+
+        '<div class="login-err" id="loginErr">'+err+'</div>'+
+        '<div class="login-foot">Access is scoped to your role. You only see your own time unless you\u2019re a lead or admin.</div>'+
       '</div>'+
-      '<button class="login-submit" type="submit" id="loginSubmit">Sign in</button>'+
-    '</form>'+
-    '<div class="login-err" id="loginErr">'+err+'</div>'+
-    '<div class="login-foot">Access is scoped to your role. You only see your own time unless you\u2019re a lead or admin.</div>'+
-  '</div>';
+    '</div>'+
+    '<div class="login-stage" aria-hidden="true">'+
+      '<canvas></canvas>'+
+      '<div class="login-stage-hint">Move to explore</div>'+
+    '</div>';
   document.body.appendChild(el);
-  startLoginBg(el);
+  startLoginStage(el);
   const passInput=document.getElementById('loginPass');
   const passToggle=document.getElementById('loginPassToggle');
   passToggle.addEventListener('click',()=>{
@@ -1616,7 +1588,7 @@ function showLogin(){
     try{
       const username=document.getElementById('loginUser').value.trim();
       const password=document.getElementById('loginPass').value;
-      const res=await fetch('/api/login',{
+      const res=await apiFetch('/api/login',{
         method:'POST',
         credentials:'same-origin',
         headers:{'Content-Type':'application/json'},
@@ -1645,7 +1617,7 @@ const fbState={space:'all',team:'all',client:'all',user:'all',source:'all'};
 const fbOpts={space:[],team:[],client:[],user:[],source:[{v:'all',l:'📡 All Sources'},{v:'clickup',l:'✅ Tasks Only'},{v:'meeting',l:'📅 Meetings Only'}]};
 const fbDefaults={space:'🗂️ All Spaces',team:'🏢 All Teams',client:'💼 All Clients',user:'👤 All Members',source:'📡 All Sources'};
 function populateFbOpts(key,items){fbOpts[key]=[{v:'all',l:fbDefaults[key]},...items.map(i=>({v:i,l:i}))];}
-function renderFbOpts(key,query){const el=document.getElementById('fbo-'+key);if(!el)return;const q=(query||'').toLowerCase();const filtered=fbOpts[key].filter(o=>o.l.toLowerCase().includes(q));if(!filtered.length){el.innerHTML='<div class="fb-no-results">No results</div>';return;}el.innerHTML=filtered.map(o=>'<button class="fb-opt'+(fbState[key]===o.v?' active':'')+'" onclick="selectFbOpt(\''+key+'\',\''+o.v+'\',event)">'+o.l+'</button>').join('');}
+function renderFbOpts(key,query){const el=document.getElementById('fbo-'+key);if(!el)return;const q=(query||'').toLowerCase();const filtered=fbOpts[key].filter(o=>o.l.toLowerCase().includes(q));if(!filtered.length){el.innerHTML='<div class="fb-no-results">No results</div>';return;}el.innerHTML=filtered.map(o=>'<button type="button" class="fb-opt'+(fbState[key]===o.v?' active':'')+'" data-fb-key="'+esc(key)+'" data-fb-val="'+esc(o.v)+'">'+esc(o.l)+'</button>').join('');el.querySelectorAll('button.fb-opt').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();selectFbOpt(btn.getAttribute('data-fb-key'),btn.getAttribute('data-fb-val'),e);}));}
 function filterFbOpts(key){const q=document.getElementById('fbs-'+key)?.value||'';renderFbOpts(key,q);}
 function toggleFbDrop(key,e){e.stopPropagation();const drop=document.getElementById('fbd-'+key);const isOpen=drop.classList.contains('open');['space','team','client','user','source'].forEach(k=>{document.getElementById('fbd-'+k)?.classList.remove('open');document.getElementById('fbg-'+k)?.classList.remove('open');});if(!isOpen){drop.classList.add('open');document.getElementById('fbg-'+key)?.classList.add('open');const inp=document.getElementById('fbs-'+key);if(inp){inp.value='';inp.focus();}renderFbOpts(key,'');}}
 function syncResetBtn(){const active=Object.values(fbState).some(v=>v!=='all');const btn=document.querySelector('.fb-reset');if(btn)btn.classList.toggle('visible',active);}
@@ -1723,14 +1695,15 @@ function renderCharts(data){
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const gc=isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.06)',tc=isDark?'#5a5a72':'#9090aa',lc=isDark?'#9090a8':'#50506a';
 
-  // ── Client Leaderboard: EXCLUDE Digilatics entirely (shown in its own card below) ──
+  // ── Client Leaderboard (admin only) ──
+  if(canSeeClients()){
   const cfAll=applySrc(data,CS.chartClient.src);
   const cf=cfAll.filter(r=>!isInternalDigilaticsClient(r.Client));
   const aCH=groupSum(cf,'Client');
   const qC=CS.chartClient.q||'';
   const sCk=Object.entries(aCH).filter(([n])=>strMatchesQ(n,qC)).sort((a,b)=>CS.chartClient.sort==='asc'?a[1]-b[1]:b[1]-a[1]).map(e=>e[0]);
   const sCkLabels=sCk.map(compactLabel);
-  const tD=cf.filter(r=>r.Source==='clickup'),mD=cf.filter(r=>r.Source==='meeting');
+  const tD=cf.filter(r=>isTaskSource(r.Source)),mD=cf.filter(r=>r.Source==='meeting');
   const tBC=sCk.map(c=>tD.filter(r=>r.Client===c).reduce((s,r)=>s+parseFloat(r.Hours||0),0));
   const mBC=sCk.map(c=>mD.filter(r=>r.Client===c).reduce((s,r)=>s+parseFloat(r.Hours||0),0));
   let cDS;
@@ -1740,6 +1713,7 @@ function renderCharts(data){
   const isSt=CS.chartClient.src==='all';
   if(charts.cBar)charts.cBar.destroy();
   charts.cBar=new Chart(document.getElementById('cBar'),{type:'bar',data:{labels:sCkLabels,datasets:cDS},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:isSt,position:'top',labels:{color:lc,font:{size:11},boxWidth:12,padding:16}},tooltip:{callbacks:{title:items=>sCk[items[0].dataIndex]||items[0].label,label:c=>' '+c.dataset.label+': '+fmtH(c.raw)}}},scales:{x:{stacked:isSt,grid:{display:false},ticks:{color:tc,font:{size:11}}},y:{stacked:isSt,grid:{color:gc},ticks:{color:tc,callback:v=>fmtH(v),font:{size:11}}}}}});
+  } // end canSeeClients client leaderboard
 
   // ── Digilatics Internal chart (only when toggle is on) ──
   const dCanvas=document.getElementById('dBar');
@@ -1750,7 +1724,7 @@ function renderCharts(data){
     const dByTeam=groupSum(df,'Space');
     const dKeys=Object.entries(dByTeam).filter(([n])=>strMatchesQ(n,qD)).sort((a,b)=>CS.chartDigilatics.sort==='asc'?a[1]-b[1]:b[1]-a[1]).map(e=>e[0]);
     const dKeyLabels=dKeys.map(compactLabel);
-    const dTaskH=dKeys.map(s=>df.filter(r=>r.Space===s&&r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0));
+    const dTaskH=dKeys.map(s=>df.filter(r=>r.Space===s&&isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0));
     const dMeetH=dKeys.map(s=>df.filter(r=>r.Space===s&&r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0));
     let dDS;
     if(CS.chartDigilatics.src==='task')dDS=[{label:'Tasks',data:dTaskH,backgroundColor:'#ff6b2b',borderRadius:6,borderSkipped:false}];
@@ -1771,9 +1745,9 @@ function renderCharts(data){
   charts.uBar=new Chart(document.getElementById('uBar'),{type:'bar',data:{labels:ukLabels,datasets:[{data:uk.map(u=>uh[u]),backgroundColor:PALETTE.slice(0,uk.length),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:items=>ukShort[items[0].dataIndex]||items[0].label,label:c=>' '+fmtH(c.raw)}}},scales:{y:{grid:{color:gc},ticks:{color:tc,callback:v=>fmtH(v),font:{size:11}}},x:{grid:{display:false},ticks:{color:tc,font:{size:11}}}}}});
 }
 
-function buildEmpRow(u,h,data,uh,ck){const ud=data.filter(r=>r.User===u);const utH=ud.filter(r=>r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const umH=ud.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const uDays=wDays(ud),rp=utilPct(uh[u]||h,uDays),pct=parseFloat(rp);const uC=[...new Set(ud.map(r=>r.Client).filter(Boolean))];const tip=uC.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+c+'</span>').join('')||'-';return '<tr><td style="color:var(--text);font-weight:600">'+su(u)+'</td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(utH)+'</td><td style="color:var(--meet)">'+fmtH(umH)+'</td><td><div style="font-size:12px;font-weight:600;color:'+(pct>100?'#e17055':pct>85?'#fdcb6e':'#55efc4')+'">'+rp+'%</div>'+utilBar(uh[u]||h,uDays)+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+uC.length+' client'+(uC.length!==1?'s':'')+'</span></td></tr>';}
+function buildEmpRow(u,h,data,uh,ck){const ud=data.filter(r=>r.User===u);const utH=ud.filter(r=>isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0);const umH=ud.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const uDays=wDays(ud),rp=utilPct(uh[u]||h,uDays),pct=parseFloat(rp);const uC=[...new Set(ud.map(r=>r.Client).filter(Boolean))];const tip=uC.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+esc(c)+'</span>').join('')||'-';return '<tr><td style="color:var(--text);font-weight:600">'+esc(su(u))+'</td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(utH)+'</td><td style="color:var(--meet)">'+fmtH(umH)+'</td><td><div style="font-size:12px;font-weight:600;color:'+(pct>100?'#e17055':pct>85?'#fdcb6e':'#55efc4')+'">'+rp+'%</div>'+utilBar(uh[u]||h,uDays)+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+uC.length+' client'+(uC.length!==1?'s':'')+'</span></td></tr>';}
 
-function updateCard(card){if(card==='entries'&&(currentNav==='mytime'||ME.role==='employee')){return updateEmpEntries();}const data=getFiltered(),ch=groupSum(data,'Client'),uh=groupSum(data,'User'),ck=Object.keys(ch);if(card==='space'){const f=applySrc(data,CS.space.src),hours=groupSum(f,'Space'),sortedAll=sortObj(hours,CS.space.sort);const sorted=sortedAll.filter(([s])=>strMatchesQ(s,CS.space.q));const total=sorted.length,{page,perPage}=CS.space,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([s,h],i)=>{const ci=(start+i)%PALETTE.length,sd=data.filter(r=>r.Space===s);const stH=sd.filter(r=>r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const smH=sd.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const sc=[...new Set(sd.map(r=>r.Client).filter(Boolean))];const tip=sc.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+c+'</span>').join('')||'-';return '<tr><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+s+'</span></td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(stH)+'</td><td style="color:var(--meet)">'+fmtH(smH)+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+sc.length+' client'+(sc.length!==1?'s':'')+'</span></td></tr>';}).join('')||'<tr><td colspan="5" class="no-data">No data</td></tr>';document.getElementById('tbody-space').innerHTML=rows;document.getElementById('pg-space').innerHTML=pgHtml('space',total);}else if(card==='team'){const f=applySrc(data,CS.team.src),hours=groupSum(f,'Team'),sortedAll=sortObj(hours,CS.team.sort);const sorted=sortedAll.filter(([t])=>strMatchesQ(t,CS.team.q));const total=sorted.length,{page,perPage}=CS.team,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([t,h],i)=>{const ci=(start+i)%PALETTE.length,td=data.filter(r=>r.Team===t);const ttH=td.filter(r=>r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const tmH=td.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const tc=[...new Set(td.map(r=>r.Client).filter(Boolean))];const tip=tc.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+c+'</span>').join('')||'-';const members=[...new Set(td.map(r=>r.User).filter(Boolean))].length;return '<tr><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+t+'</span></td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(ttH)+'</td><td style="color:var(--meet)">'+fmtH(tmH)+'</td><td>'+members+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+tc.length+' client'+(tc.length!==1?'s':'')+'</span></td></tr>';}).join('')||'<tr><td colspan="6" class="no-data">No data</td></tr>';document.getElementById('tbody-team').innerHTML=rows;document.getElementById('pg-team').innerHTML=pgHtml('team',total);}else if(card==='employee'){const f=applySrc(data,CS.employee.src),hours=groupSum(f,'User'),sortedAll=sortObj(hours,CS.employee.sort);const sorted=sortedAll.filter(([u])=>strMatchesQ(su(u),CS.employee.q)||strMatchesQ(u,CS.employee.q));const total=sorted.length,{page,perPage}=CS.employee,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([u,h])=>buildEmpRow(u,h,data,uh,ck)).join('')||'<tr><td colspan="6" class="no-data">No data</td></tr>';document.getElementById('tbody-employee').innerHTML=rows;document.getElementById('pg-employee').innerHTML=pgHtml('employee',total);}else if(card==='entries'){const f=applySrc(data,CS.entries.src).filter(r=>rowMatchesQ(r,CS.entries.q,['Client','Task','User','Space','Team']));const sorted=[...f].sort((a,b)=>{const dir=CS.entries.sort==='asc'?1:-1;if(CS.entries.col==='date')return(a._date||'').localeCompare(b._date||'')*dir;if(CS.entries.col==='hours')return(parseFloat(a.Hours||0)-parseFloat(b.Hours||0))*dir;if(CS.entries.col==='client')return(a.Client||'').localeCompare(b.Client||'')*dir;if(CS.entries.col==='member')return(a.User||'').localeCompare(b.User||'')*dir;return 0;});const total=sorted.length,{page,perPage}=CS.entries,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(r=>{const ci=ck.indexOf(r.Client)%PALETTE.length;const src=r.Source==='meeting'?'<span class="chip chip-meeting">Meet</span>':'<span class="chip chip-task">Task</span>';const dt=r._date?new Date(r._date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-';const td=r.Url?'<a class="task-link" href="'+r.Url+'" target="_blank">'+(r.Task||'-')+' &#8599;</a>':(r.Task||'-');const sp=r.Space&&r.Space!=='-'?'<span class="space-chip">'+r.Space+'</span>':'-';const tm=r.Team?'<span class="space-chip">'+r.Team+'</span>':'-';return '<tr><td>'+dt+'</td><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+r.Client+'</span></td><td style="color:var(--text)">'+td+'</td><td>'+su(r.User)+'</td><td style="color:var(--text);font-weight:600">'+fmtH(r.Hours)+'</td><td>'+src+'</td><td>'+sp+'</td><td>'+tm+'</td></tr>';}).join('')||'<tr><td colspan="8" class="no-data">No entries</td></tr>';document.getElementById('tbody-entries').innerHTML=rows;document.getElementById('pg-entries').innerHTML=pgHtml('entries',total);['date','client','member','hours'].forEach(col=>{const th=document.getElementById('th-entries-'+col);if(th){th.className=CS.entries.col===col?'th-sorted':'';th.querySelector('.sort-icon').textContent=CS.entries.col===col?(CS.entries.sort==='asc'?'↑':'↓'):'↕';}});}}
+function updateCard(card){if(card==='entries'&&(currentNav==='mytime'||ME.role==='employee')){return updateEmpEntries();}const data=getFiltered(),ch=groupSum(data,'Client'),uh=groupSum(data,'User'),ck=Object.keys(ch);if(card==='space'){const f=applySrc(data,CS.space.src),hours=groupSum(f,'Space'),sortedAll=sortObj(hours,CS.space.sort);const sorted=sortedAll.filter(([s])=>strMatchesQ(s,CS.space.q));const total=sorted.length,{page,perPage}=CS.space,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([s,h],i)=>{const ci=(start+i)%PALETTE.length,sd=data.filter(r=>r.Space===s);const stH=sd.filter(r=>isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0);const smH=sd.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const sc=[...new Set(sd.map(r=>r.Client).filter(Boolean))];const tip=sc.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+esc(c)+'</span>').join('')||'-';return '<tr><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+esc(s)+'</span></td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(stH)+'</td><td style="color:var(--meet)">'+fmtH(smH)+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+sc.length+' client'+(sc.length!==1?'s':'')+'</span></td></tr>';}).join('')||'<tr><td colspan="5" class="no-data">No data</td></tr>';document.getElementById('tbody-space').innerHTML=rows;document.getElementById('pg-space').innerHTML=pgHtml('space',total);}else if(card==='team'){const f=applySrc(data,CS.team.src),hours=groupSum(f,'Team'),sortedAll=sortObj(hours,CS.team.sort);const sorted=sortedAll.filter(([t])=>strMatchesQ(t,CS.team.q));const total=sorted.length,{page,perPage}=CS.team,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([t,h],i)=>{const ci=(start+i)%PALETTE.length,td=data.filter(r=>r.Team===t);const ttH=td.filter(r=>isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0);const tmH=td.filter(r=>r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0);const tc=[...new Set(td.map(r=>r.Client).filter(Boolean))];const tip=tc.map(c=>'<span class="chip" style="background:'+PALETTE[ck.indexOf(c)%PALETTE.length]+'18;color:'+PALETTE[ck.indexOf(c)%PALETTE.length]+';margin:2px">'+esc(c)+'</span>').join('')||'-';const members=[...new Set(td.map(r=>r.User).filter(Boolean))].length;return '<tr><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+esc(t)+'</span></td><td style="color:var(--text);font-weight:600">'+fmtH(h)+'</td><td style="color:var(--accent)">'+fmtH(ttH)+'</td><td style="color:var(--meet)">'+fmtH(tmH)+'</td><td>'+members+'</td><td><span class="cl-label" data-tip="'+escQ(tip)+'">'+tc.length+' client'+(tc.length!==1?'s':'')+'</span></td></tr>';}).join('')||'<tr><td colspan="6" class="no-data">No data</td></tr>';document.getElementById('tbody-team').innerHTML=rows;document.getElementById('pg-team').innerHTML=pgHtml('team',total);}else if(card==='employee'){const f=applySrc(data,CS.employee.src),hours=groupSum(f,'User'),sortedAll=sortObj(hours,CS.employee.sort);const sorted=sortedAll.filter(([u])=>strMatchesQ(su(u),CS.employee.q)||strMatchesQ(u,CS.employee.q));const total=sorted.length,{page,perPage}=CS.employee,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(([u,h])=>buildEmpRow(u,h,data,uh,ck)).join('')||'<tr><td colspan="6" class="no-data">No data</td></tr>';document.getElementById('tbody-employee').innerHTML=rows;document.getElementById('pg-employee').innerHTML=pgHtml('employee',total);}else if(card==='entries'){const showClients=canSeeClients();const f=applySrc(data,CS.entries.src).filter(r=>rowMatchesQ(r,CS.entries.q,showClients?['Client','Task','User','Space','Team']:['Task','User','Space','Team']));const sorted=[...f].sort((a,b)=>{const dir=CS.entries.sort==='asc'?1:-1;if(CS.entries.col==='date')return(a._date||'').localeCompare(b._date||'')*dir;if(CS.entries.col==='hours')return(parseFloat(a.Hours||0)-parseFloat(b.Hours||0))*dir;if(CS.entries.col==='client')return(a.Client||'').localeCompare(b.Client||'')*dir;if(CS.entries.col==='member')return(a.User||'').localeCompare(b.User||'')*dir;return 0;});const total=sorted.length,{page,perPage}=CS.entries,start=(page-1)*perPage;const rows=sorted.slice(start,start+perPage).map(r=>{const ci=ck.indexOf(r.Client)%PALETTE.length;const src=r.Source==='meeting'?'<span class="chip chip-meeting">Meet</span>':'<span class="chip chip-task">Task</span>';const dt=r._date?new Date(r._date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-';const td=taskLinkHtml(r);const sp=r.Space&&r.Space!=='-'?'<span class="space-chip">'+esc(r.Space)+'</span>':'-';const tm=r.Team?'<span class="space-chip">'+esc(r.Team)+'</span>':'-';const clientTd=showClients?'<td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+esc(r.Client)+'</span></td>':'';return '<tr><td>'+dt+'</td>'+clientTd+'<td style="color:var(--text)">'+td+'</td><td>'+su(r.User)+'</td><td style="color:var(--text);font-weight:600">'+fmtH(r.Hours)+'</td><td>'+src+'</td><td>'+sp+'</td><td>'+tm+'</td></tr>';}).join('')||'<tr><td colspan="'+(showClients?8:7)+'" class="no-data">No entries</td></tr>';document.getElementById('tbody-entries').innerHTML=rows;document.getElementById('pg-entries').innerHTML=pgHtml('entries',total);(showClients?['date','client','member','hours']:['date','member','hours']).forEach(col=>{const th=document.getElementById('th-entries-'+col);if(th){th.className=CS.entries.col===col?'th-sorted':'';th.querySelector('.sort-icon').textContent=CS.entries.col===col?(CS.entries.sort==='asc'?'↑':'↓'):'↕';}});}}
 
 /* ── Role-aware re-render dispatcher (used by all controls) ── */
 function rerender(){
@@ -1785,7 +1759,7 @@ function rerender(){
 /* ── My Time (default landing — own data only) ── */
 function renderMyTimeView(){
   const data=getMyFiltered();
-  const taskData=data.filter(r=>r.Source==='clickup'),meetData=data.filter(r=>r.Source==='meeting');
+  const taskData=data.filter(r=>isTaskSource(r.Source)),meetData=data.filter(r=>r.Source==='meeting');
   const totalH=data.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const taskH=taskData.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const meetH=meetData.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
@@ -1795,6 +1769,7 @@ function renderMyTimeView(){
   const ch=groupSum(data,'Client');
   Object.values(charts).forEach(c=>c.destroy());charts={};
 
+  const showClients=canSeeClients();
   document.getElementById('content').innerHTML=
     buildMyTimeHero()+
     '<div class="page-section" id="sec-mytime">'+
@@ -1802,11 +1777,11 @@ function renderMyTimeView(){
     buildMyTimeFilterCard()+
     '<div class="metrics-grid">'+
       mc('My Total Hours',fmtHMetric(totalH),'All sources combined')+
-      mc('Task Hours',fmtHMetric(taskH),'From ClickUp')+
+      mc('Task Hours',fmtHMetric(taskH),'ClickUp + Google Tasks')+
       mc('Meeting Hours',fmtHMetric(meetH),'From Google Calendar')+
-      mc('Tasks Logged',tasksCount,'ClickUp entries')+
+      mc('Tasks Logged',tasksCount,'Task entries')+
       mc('Avg / Task',fmtHMetric(avgPerTask),'Avg hours per task')+
-      mc('My Clients',Object.keys(ch).length,'Active this period')+
+      (showClients?mc('My Clients',Object.keys(ch).length,'Active this period'):mc('My Clients','—','Coming soon'))+
     '</div>'+
     buildTimersHtml()+
     '<div style="margin-bottom:28px;"></div>'+
@@ -1815,13 +1790,15 @@ function renderMyTimeView(){
     '<div class="section-label">My Activity</div>'+
     '<div class="charts-stack">'+
       '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Daily Hours</div><div class="chart-sub">Your hours per day &middot; Tasks &amp; Meetings</div></div></div><div class="chart-wrap"><canvas id="empDaily"></canvas></div></div>'+
-      '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Hours by Client</div><div class="chart-sub">Where your time went</div></div></div><div class="chart-wrap"><canvas id="empClient"></canvas></div></div>'+
+      (showClients
+        ? '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Hours by Client</div><div class="chart-sub">Where your time went</div></div></div><div class="chart-wrap"><canvas id="empClient"></canvas></div></div>'
+        : comingSoonBlock('Hours by Client','Coming soon for your role'))+
     '</div></div>'+
     '<div class="page-section" id="sec-entries">'+
     '<div class="section-label">My Activity</div>'+
     '<div class="detail-card"><div class="card-header"><div><div class="table-title">My Activity Log</div><div class="table-sub">Click column headers to sort</div></div><div class="card-controls" id="ctrl-entries">'+
-      (mkSrcBtns('entries')+'<div class="ctrl-sep"></div>'+mkSearch('entries','Search client, task...'))+
-    '</div></div><div class="table-wrap"><table><thead><tr>'+thSort('date','Date')+thSort('client','Client')+'<th>Task / Meeting</th>'+thSort('hours','Hours')+'<th>Source</th><th>Space</th></tr></thead><tbody id="tbody-entries"></tbody></table></div><div id="pg-entries"></div></div></div>';
+      (mkSrcBtns('entries')+'<div class="ctrl-sep"></div>'+mkSearch('entries',showClients?'Search client, task...':'Search task...'))+
+    '</div></div><div class="table-wrap"><table><thead><tr>'+thSort('date','Date')+(showClients?thSort('client','Client'):'<!-- <th>Client</th> -->')+'<th>Task / Meeting</th>'+thSort('hours','Hours')+'<th>Source</th><th>Space</th></tr></thead><tbody id="tbody-entries"></tbody></table></div><div id="pg-entries"></div></div></div>';
 
   // entries table reuses the shared engine but with fewer columns → custom render
   updateEmpEntries();
@@ -1829,14 +1806,24 @@ function renderMyTimeView(){
 }
 
 function updateEmpEntries(){
+  const showClients=canSeeClients();
   const data=getMyFiltered(),ch=groupSum(data,'Client'),ck=Object.keys(ch);
-  const f=applySrc(data,CS.entries.src).filter(r=>rowMatchesQ(r,CS.entries.q,['Client','Task','Space']));
+  const f=applySrc(data,CS.entries.src).filter(r=>rowMatchesQ(r,CS.entries.q,showClients?['Client','Task','Space']:['Task','Space']));
   const sorted=[...f].sort((a,b)=>{const dir=CS.entries.sort==='asc'?1:-1;if(CS.entries.col==='date')return(a._date||'').localeCompare(b._date||'')*dir;if(CS.entries.col==='hours')return(parseFloat(a.Hours||0)-parseFloat(b.Hours||0))*dir;if(CS.entries.col==='client')return(a.Client||'').localeCompare(b.Client||'')*dir;return 0;});
   const total=sorted.length,{page,perPage}=CS.entries,start=(page-1)*perPage;
-  const rows=sorted.slice(start,start+perPage).map(r=>{const ci=ck.indexOf(r.Client)%PALETTE.length;const src=r.Source==='meeting'?'<span class="chip chip-meeting">Meet</span>':'<span class="chip chip-task">Task</span>';const dt=r._date?new Date(r._date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-';const td=r.Url?'<a class="task-link" href="'+r.Url+'" target="_blank">'+(r.Task||'-')+' &#8599;</a>':(r.Task||'-');const sp=r.Space&&r.Space!=='-'?'<span class="space-chip">'+r.Space+'</span>':'-';return '<tr><td>'+dt+'</td><td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+r.Client+'</span></td><td style="color:var(--text)">'+td+'</td><td style="color:var(--text);font-weight:600">'+fmtH(r.Hours)+'</td><td>'+src+'</td><td>'+sp+'</td></tr>';}).join('')||'<tr><td colspan="6" class="no-data">No entries</td></tr>';
+  const rows=sorted.slice(start,start+perPage).map(r=>{
+    const ci=ck.indexOf(r.Client)%PALETTE.length;
+    const src=r.Source==='meeting'?'<span class="chip chip-meeting">Meet</span>':'<span class="chip chip-task">Task</span>';
+    const dt=r._date?new Date(r._date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'-';
+    const td=taskLinkHtml(r);
+    const sp=r.Space&&r.Space!=='-'?'<span class="space-chip">'+esc(r.Space)+'</span>':'-';
+    const clientTd=showClients?'<td><span class="chip" style="background:'+PALETTE[ci]+'18;color:'+PALETTE[ci]+'">'+esc(r.Client)+'</span></td>':'';
+    return '<tr><td>'+dt+'</td>'+clientTd+'<td style="color:var(--text)">'+td+'</td><td style="color:var(--text);font-weight:600">'+fmtH(r.Hours)+'</td><td>'+src+'</td><td>'+sp+'</td></tr>';
+  }).join('')||'<tr><td colspan="'+(showClients?6:5)+'" class="no-data">No entries</td></tr>';
   document.getElementById('tbody-entries').innerHTML=rows;
   document.getElementById('pg-entries').innerHTML=pgHtml('entries',total);
-  ['date','client','hours'].forEach(col=>{const th=document.getElementById('th-entries-'+col);if(th){th.className=CS.entries.col===col?'th-sorted':'';th.querySelector('.sort-icon').textContent=CS.entries.col===col?(CS.entries.sort==='asc'?'\u2191':'\u2193'):'\u2195';}});
+  const sortCols=showClients?['date','client','hours']:['date','hours'];
+  sortCols.forEach(col=>{const th=document.getElementById('th-entries-'+col);if(th){th.className=CS.entries.col===col?'th-sorted':'';const icon=th.querySelector('.sort-icon');if(icon)icon.textContent=CS.entries.col===col?(CS.entries.sort==='asc'?'\u2191':'\u2193'):'\u2195';}});
 }
 
 function renderEmpCharts(data){
@@ -1845,7 +1832,7 @@ function renderEmpCharts(data){
   // Daily hours (stacked task/meeting by date, chronological)
   const dayKeys=[...new Set(data.map(r=>r._date).filter(Boolean))].sort();
   const dayLbl=dayKeys.map(d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
-  const tByDay=dayKeys.map(d=>data.filter(r=>r._date===d&&r.Source==='clickup').reduce((a,r)=>a+parseFloat(r.Hours||0),0));
+  const tByDay=dayKeys.map(d=>data.filter(r=>r._date===d&&isTaskSource(r.Source)).reduce((a,r)=>a+parseFloat(r.Hours||0),0));
   const mByDay=dayKeys.map(d=>data.filter(r=>r._date===d&&r.Source==='meeting').reduce((a,r)=>a+parseFloat(r.Hours||0),0));
   const dc=document.getElementById('empDaily');
   if(dc)charts.empDaily=new Chart(dc,{type:'bar',data:{labels:dayLbl,datasets:[{label:'Tasks',data:tByDay,backgroundColor:'#ff6b2b',borderRadius:4,stack:'s'},{label:'Meetings',data:mByDay,backgroundColor:'#4a9eff',borderRadius:4,stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{color:tc,font:{size:11},boxWidth:12,padding:14}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmtH(c.raw)}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:tc,font:{size:11}}},y:{stacked:true,grid:{color:gc},ticks:{color:tc,callback:v=>fmtH(v),font:{size:11}}}}}});
@@ -1858,7 +1845,7 @@ function renderEmpCharts(data){
 
 function renderDashboard(){
   const data=getFiltered();
-  const taskData=data.filter(r=>r.Source==='clickup'),meetData=data.filter(r=>r.Source==='meeting');
+  const taskData=data.filter(r=>isTaskSource(r.Source)),meetData=data.filter(r=>r.Source==='meeting');
   const totalH=data.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const taskH=taskData.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const meetH=meetData.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
@@ -1879,11 +1866,19 @@ function renderDashboard(){
   // Compute Digilatics totals for the internal card
   const digiData=includeDigilatics?data.filter(r=>isInternalDigilaticsClient(r.Client)):[];
   const digiTotal=digiData.reduce((s,r)=>s+parseFloat(r.Hours||0),0);
-  const digiTaskH=digiData.filter(r=>r.Source==='clickup').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
+  const digiTaskH=digiData.filter(r=>isTaskSource(r.Source)).reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const digiMeetH=digiData.filter(r=>r.Source==='meeting').reduce((s,r)=>s+parseFloat(r.Hours||0),0);
   const digiCardHtml=includeDigilatics?
     '<div class="chart-card" id="digiCard"><div class="chart-card-header"><div><div class="chart-title" style="display:flex;align-items:center;gap:8px;"><img src="/logo.svg" alt="" style="width:18px;height:18px;border-radius:4px"> Digilatics (Internal)</div><div class="chart-sub">Internal hours by Team &middot; Total: <strong style="color:var(--text)">'+fmtH(digiTotal)+'</strong> &middot; Tasks: <strong style="color:var(--accent)">'+fmtH(digiTaskH)+'</strong> &middot; Meetings: <strong style="color:#4a9eff">'+fmtH(digiMeetH)+'</strong></div></div><div class="card-controls" id="ctrl-chartDigilatics">'+ctrlChDigi+'</div></div><div class="chart-wrap"><canvas id="dBar"></canvas></div></div>':'';
+  const showClients=canSeeClients();
   const clientSub=includeDigilatics?'Tasks &amp; Meetings per client &middot; internal Digilatics shown below':'Client billable hours only &middot; Digilatics internal excluded';
+  const clientsMetric=showClients?mc('Clients',Object.keys(ch).length,'Active this period'):mc('Clients','—','Coming soon');
+  const top5Html=showClients?buildTop5Html(data):comingSoonBlock('Client Leaderboards','Most / least active clients — Coming soon');
+  const clientChartHtml=showClients
+    ? '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Client Leaderboard</div><div class="chart-sub">'+clientSub+'</div></div><div class="card-controls" id="ctrl-chartClient">'+ctrlChClient+'</div></div><div class="chart-wrap"><canvas id="cBar"></canvas></div></div>'
+    : comingSoonBlock('Client Leaderboard','Coming soon for leads &amp; employees');
+  const thClients=showClients?'<th>Clients</th>':'<!-- <th>Clients</th> -->';
+  const thClientCol=showClients?thSort('client','Client'):'<!-- client col -->';
 
   document.getElementById('content').innerHTML=
     '<div id="dashboardFilters" class="dashboard-filters"></div>'+
@@ -1891,13 +1886,13 @@ function renderDashboard(){
     '<div class="section-label">Performance Overview</div>'+
     '<div class="metrics-grid">'+
       mc('Total Hours',fmtHMetric(totalH),includeDigilatics?'All sources incl. internal':'Client hours only')+
-      mc('Task Hours',fmtHMetric(taskH),'From ClickUp')+
+      mc('Task Hours',fmtHMetric(taskH),'ClickUp + Google Tasks')+
       mc('Meeting Hours',fmtHMetric(meetH),'From Google Calendar')+
-      mc('Tasks Logged',tasksCount,'ClickUp entries')+
+      mc('Tasks Logged',tasksCount,'Task entries')+
       mc('Avg / Task',fmtHMetric(avgPerTask),'Avg hours per task')+
-      mc('Clients',Object.keys(ch).length,'Active this period')+
+      clientsMetric+
     '</div>'+
-    buildTop5Html(data)+
+    top5Html+
     buildTimersHtml()+
     '<div style="margin-bottom:28px;"></div>'+
     '<div class="split-bar-card"><div class="split-label">Tasks vs Meetings</div><div class="split-wrap"><div class="split-track"><div class="split-task" style="width:'+taskPct+'%"></div><div class="split-meeting" style="width:'+meetPct+'%"></div></div><div class="split-legend"><div class="split-legend-item"><div class="split-dot" style="background:var(--accent)"></div>Tasks &#8212; '+fmtH(taskH)+' ('+taskPct+'%)</div><div class="split-legend-item"><div class="split-dot" style="background:#4a9eff"></div>Meetings &#8212; '+fmtH(meetH)+' ('+meetPct+'%)</div></div></div></div>'+
@@ -1905,22 +1900,22 @@ function renderDashboard(){
     '<div class="page-section" id="sec-analytics">'+
     '<div class="section-label">Visual Analytics</div>'+
     '<div class="charts-stack">'+
-      '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Client Leaderboard</div><div class="chart-sub">'+clientSub+'</div></div><div class="card-controls" id="ctrl-chartClient">'+ctrlChClient+'</div></div><div class="chart-wrap"><canvas id="cBar"></canvas></div></div>'+
+      clientChartHtml+
       digiCardHtml+
       '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Member Board</div><div class="chart-sub">Individual hours logged</div></div><div class="card-controls" id="ctrl-chartMember">'+ctrlChMember+'</div></div><div class="chart-wrap"><canvas id="uBar"></canvas></div></div>'+
     '</div></div>'+
     '<div class="page-section" id="sec-teams">'+
     '<div class="section-label">Team Breakdown</div>'+
-    '<div class="tables-grid-1"><div class="table-card"><div class="card-header"><div><div class="table-title">Team Breakdown</div><div class="table-sub">Hours logged by Department</div></div><div class="card-controls" id="ctrl-team">'+ctrlTeam+'</div></div><div class="table-wrap"><table><thead><tr><th>Team</th><th>Total</th><th>Tasks</th><th>Meetings</th><th>Members</th><th>Clients</th></tr></thead><tbody id="tbody-team"></tbody></table></div><div id="pg-team"></div></div></div></div>'+
+    '<div class="tables-grid-1"><div class="table-card"><div class="card-header"><div><div class="table-title">Team Breakdown</div><div class="table-sub">Hours logged by Department</div></div><div class="card-controls" id="ctrl-team">'+ctrlTeam+'</div></div><div class="table-wrap"><table><thead><tr><th>Team</th><th>Total</th><th>Tasks</th><th>Meetings</th><th>Members</th>'+thClients+'</tr></thead><tbody id="tbody-team"></tbody></table></div><div id="pg-team"></div></div></div></div>'+
     '<div class="page-section" id="sec-spaces">'+
     '<div class="section-label">Space Breakdown</div>'+
-    '<div class="tables-grid-1"><div class="table-card"><div class="card-header"><div><div class="table-title">Space Breakdown</div><div class="table-sub">Hours logged by ClickUp Space</div></div><div class="card-controls" id="ctrl-space">'+ctrlSpace+'</div></div><div class="table-wrap"><table><thead><tr><th>Space</th><th>Total</th><th>Tasks</th><th>Meetings</th><th>Clients</th></tr></thead><tbody id="tbody-space"></tbody></table></div><div id="pg-space"></div></div></div></div>'+
+    '<div class="tables-grid-1"><div class="table-card"><div class="card-header"><div><div class="table-title">Space Breakdown</div><div class="table-sub">Hours logged by ClickUp Space</div></div><div class="card-controls" id="ctrl-space">'+ctrlSpace+'</div></div><div class="table-wrap"><table><thead><tr><th>Space</th><th>Total</th><th>Tasks</th><th>Meetings</th>'+thClients+'</tr></thead><tbody id="tbody-space"></tbody></table></div><div id="pg-space"></div></div></div></div>'+
     '<div class="page-section" id="sec-employees">'+
     '<div class="section-label">Employee Details</div>'+
-    '<div class="detail-card" style="margin-bottom:24px"><div class="card-header"><div><div class="table-title">Employee Breakdown</div><div class="table-sub">Hours logged vs Productivity</div></div><div class="card-controls" id="ctrl-employee">'+ctrlEmp+'</div></div><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Total</th><th>Tasks</th><th>Meetings</th><th>Utilization</th><th>Clients</th></tr></thead><tbody id="tbody-employee"></tbody></table></div><div id="pg-employee"></div></div></div>'+
+    '<div class="detail-card" style="margin-bottom:24px"><div class="card-header"><div><div class="table-title">Employee Breakdown</div><div class="table-sub">Hours logged vs Productivity</div></div><div class="card-controls" id="ctrl-employee">'+ctrlEmp+'</div></div><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Total</th><th>Tasks</th><th>Meetings</th><th>Utilization</th>'+thClients+'</tr></thead><tbody id="tbody-employee"></tbody></table></div><div id="pg-employee"></div></div></div>'+
     '<div class="page-section" id="sec-entries">'+
     '<div class="section-label">All Entries</div>'+
-    '<div class="detail-card"><div class="card-header"><div><div class="table-title">Full Activity Log</div><div class="table-sub">Click column headers to sort</div></div><div class="card-controls" id="ctrl-entries">'+ctrlEnt+'</div></div><div class="table-wrap"><table><thead><tr>'+thSort('date','Date')+thSort('client','Client')+'<th>Task / Meeting</th>'+thSort('member','Member')+thSort('hours','Hours')+'<th>Source</th><th>Space</th><th>Team</th></tr></thead><tbody id="tbody-entries"></tbody></table></div><div id="pg-entries"></div></div></div>'+
+    '<div class="detail-card"><div class="card-header"><div><div class="table-title">Full Activity Log</div><div class="table-sub">Click column headers to sort</div></div><div class="card-controls" id="ctrl-entries">'+ctrlEnt+'</div></div><div class="table-wrap"><table><thead><tr>'+thSort('date','Date')+thClientCol+'<th>Task / Meeting</th>'+thSort('member','Member')+thSort('hours','Hours')+'<th>Source</th><th>Space</th><th>Team</th></tr></thead><tbody id="tbody-entries"></tbody></table></div><div id="pg-entries"></div></div></div>'+
     '<div class="page-section" id="sec-sync" style="display:none"></div>';
 
   updateCard('team');
@@ -1939,6 +1934,7 @@ const TEAM_NAV_IDS=['overview','analytics','teams','spaces','employees','entries
 function syncNavForRole(){
   const admin=ME&&ME.role==='admin';
   const emp=ME&&ME.role==='employee';
+  syncClientVisibility();
   const teamSec=document.getElementById('navTeamSection');
   const adminSec=document.getElementById('navAdminSection');
   if(teamSec)teamSec.style.display=emp?'none':'';
@@ -1955,7 +1951,7 @@ async function loadSyncStatus(){
   host.style.display='';
   host.innerHTML='<div class="section-label">Sync Status</div><div class="loading"><div class="spinner"></div>Loading sync runs...</div>';
   try{
-    const res=await fetch('/api/sync/status',{credentials:'same-origin'});
+    const res=await apiFetch('/api/sync/status',{credentials:'same-origin'});
     if(!res.ok)throw new Error('status '+res.status);
     const runs=await res.json();
     let rows=runs.map(r=>'<tr><td>'+(r.job||'')+'</td><td>'+(r.status||'')+'</td><td>'+(r.rows_inserted??'')+'</td><td>'+(r.started_at||'')+'</td><td>'+(r.finished_at||'')+'</td></tr>').join('');
@@ -1972,7 +1968,7 @@ async function loadSyncStatus(){
 }
 async function triggerSync(job){
   try{
-    const res=await fetch('/api/sync/'+job,{method:'POST',credentials:'same-origin'});
+    const res=await apiFetch('/api/sync/'+job,{method:'POST',credentials:'same-origin'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)alert(data.detail||('Sync failed: '+res.status));
     else {alert(job+' sync ok — inserted '+(data.debug&&data.debug.rowsInserted!=null?data.debug.rowsInserted:'?')); loadSyncStatus(); loadData();}
@@ -1998,7 +1994,7 @@ function settingsMsg(id,text,ok){
 
 async function loadSettingsMeta(){
   try{
-    const res=await fetch('/api/settings/meta',{credentials:'same-origin'});
+    const res=await apiFetch('/api/settings/meta',{credentials:'same-origin'});
     if(!res.ok)return null;
     return await res.json();
   }catch(e){return null;}
@@ -2018,7 +2014,7 @@ async function saveProfileSettings(ev){
   const body={name};
   if(nw){body.current_password=cur;body.new_password=nw;}
   try{
-    const res=await fetch('/api/settings/profile',{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const res=await apiFetch('/api/settings/profile',{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){settingsMsg('profMsg',data.detail||'Could not save profile',false);return;}
     settingsMsg('profMsg','Profile updated',true);
@@ -2041,7 +2037,7 @@ async function saveClientSettings(ev){
     domains:document.getElementById('clientDomains').value.trim()
   };
   try{
-    const res=await fetch('/api/admin/clients',{
+    const res=await apiFetch('/api/admin/clients',{
       method:editingClientName?'PATCH':'POST',
       credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
@@ -2089,7 +2085,7 @@ async function deleteClient(name){
   if(!confirm('Delete client "'+name+'"? This cannot be undone.'))return;
   settingsMsg('clientMsg','Deleting…');
   try{
-    const res=await fetch('/api/admin/clients?name='+encodeURIComponent(name),{method:'DELETE',credentials:'same-origin'});
+    const res=await apiFetch('/api/admin/clients?name='+encodeURIComponent(name),{method:'DELETE',credentials:'same-origin'});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){settingsMsg('clientMsg',data.detail||'Could not delete',false);return;}
     if(editingClientName===name)clearClientEditForm();
@@ -2141,7 +2137,7 @@ async function saveUserSettings(ev){
     identities:[document.getElementById('userIdentitiesExtra').value.trim()].filter(Boolean).join(',')
   };
   try{
-    const res=await fetch('/api/admin/users',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const res=await apiFetch('/api/admin/users',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){settingsMsg('userMsg',data.detail||'Could not add user',false);return;}
     settingsMsg('userMsg','User added: '+(data.user&&data.user.email?data.user.email:body.email),true);
@@ -2163,7 +2159,7 @@ async function loadSettingsClientsList(){
   if(!host)return;
   host.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
-    const res=await fetch('/api/admin/clients',{credentials:'same-origin'});
+    const res=await apiFetch('/api/admin/clients',{credentials:'same-origin'});
     if(!res.ok)throw new Error('clients '+res.status);
     allClientsCache=await res.json();
     allClientsCache.sort((a,b)=>a.name.localeCompare(b.name));
@@ -2183,7 +2179,7 @@ async function loadSettingsUsersList(){
   if(!host)return;
   host.innerHTML='<div class="loading"><div class="spinner"></div></div>';
   try{
-    const res=await fetch('/api/admin/users',{credentials:'same-origin'});
+    const res=await apiFetch('/api/admin/users',{credentials:'same-origin'});
     if(!res.ok)throw new Error('users '+res.status);
     const rows=await res.json();
     host.innerHTML='<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Team</th></tr></thead><tbody>'+
@@ -2192,7 +2188,6 @@ async function loadSettingsUsersList(){
   }catch(e){host.innerHTML='<div class="hint" style="padding:12px">Could not load users.</div>';}
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 async function renderSettingsView(){
   if(!ME)return;
@@ -2218,8 +2213,8 @@ async function renderSettingsView(){
         '<label>Email<span class="hint">Login email (read-only)</span><input type="email" value="'+esc(ME.email)+'" disabled></label>'+
         '<label>Display name<input type="text" id="profName" value="'+esc(ME.name||'')+'" required></label>'+
         '<label>Current password<span class="hint">Required only when changing password</span><input type="password" id="profCurPw" autocomplete="current-password"></label>'+
-        '<label>New password<input type="password" id="profNewPw" autocomplete="new-password" minlength="6"></label>'+
-        '<label>Confirm new password<input type="password" id="profConfPw" autocomplete="new-password" minlength="6"></label>'+
+        '<label>New password<input type="password" id="profNewPw" autocomplete="new-password" minlength="10"></label>'+
+        '<label>Confirm new password<input type="password" id="profConfPw" autocomplete="new-password" minlength="10"></label>'+
         '<button type="submit" class="settings-save" id="profSaveBtn">Save profile</button>'+
         '<div class="settings-msg" id="profMsg"></div>'+
       '</form></div></div>'+
@@ -2245,7 +2240,7 @@ async function renderSettingsView(){
         '<label>Work email<input type="email" id="userEmail" required placeholder="name@digilatics.com" onblur="predictUserIdentities()"></label>'+
         '<label>Full name<input type="text" id="userName" required placeholder="First Last" onblur="predictUserIdentities()"></label>'+
         '<label>Username<input type="text" id="userUsername" required placeholder="firstname" onblur="predictUserIdentities()"></label>'+
-        '<label>Password<input type="password" id="userPassword" required minlength="6" placeholder="Initial password"></label>'+
+        '<label>Password<input type="password" id="userPassword" required minlength="10" placeholder="Initial password"></label>'+
         '<label>Role<select id="userRole"><option value="employee">Employee</option><option value="lead">Lead</option><option value="admin">Admin</option></select></label>'+
         '<label>Team (for leads)<span class="hint">Pick or type comma-separated — e.g. Ads, SEO</span><input type="text" id="userTeams" list="teamOptions" placeholder="Ads"></label>'+
         '<datalist id="teamOptions">'+teamOpts+'</datalist>'+
@@ -2325,7 +2320,7 @@ async function predictUserIdentities(){
   if(name.length<2||email.length<3)return;
   if(srcEl)srcEl.textContent='Predicting…';
   try{
-    const res=await fetch('/api/admin/predict-identities',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,username})});
+    const res=await apiFetch('/api/admin/predict-identities',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,username})});
     const data=await res.json().catch(()=>({}));
     if(!res.ok){if(srcEl)srcEl.textContent='Could not predict';return;}
     renderIdentityChips(data.identities||[]);
@@ -2379,7 +2374,7 @@ async function sendChat(){
   appendChatMsg('bot','…');
   const pending=document.getElementById('chatMsgs')?.lastElementChild;
   try{
-    const res=await fetch('/api/chat',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:chatHistory.slice(0,-1)})});
+    const res=await apiFetch('/api/chat',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,history:chatHistory.slice(0,-1)})});
     const data=await res.json().catch(()=>({}));
     const reply=data.reply||data.detail||'No reply';
     if(pending)pending.textContent=reply;

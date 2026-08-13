@@ -22,18 +22,29 @@ from starlette.middleware.sessions import SessionMiddleware
 from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
 
+from security import (
+    SecurityHeadersMiddleware,
+    client_ip,
+    establish_session,
+    is_local_dev_request,
+    login_guard,
+    require_strong_session_secret,
+    validate_password_strength,
+    verify_session_binding,
+)
+
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
 # ─────────────────────────── config ───────────────────────────
-SESSION_SECRET   = os.getenv("SESSION_SECRET", "change-me-please-a-long-random-string")
+SESSION_SECRET   = require_strong_session_secret(os.getenv("SESSION_SECRET"))
 ALLOWED_DOMAIN   = os.getenv("ALLOWED_DOMAIN", "digilatics.com").lower().strip()
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_SECRET    = os.getenv("GOOGLE_CLIENT_SECRET", "")
 CACHE_TTL        = int(os.getenv("CACHE_TTL_SECONDS", "60"))
 COOKIE_SECURE    = os.getenv("COOKIE_SECURE", "true").lower() == "true"
-# Optional escape hatch: /login?as=email still works when true. Prefer password login.
+# Local-only impersonation. Never enable in production.
 DEV_LOGIN        = os.getenv("DEV_LOGIN", "false").lower() == "true"
 BASE_URL         = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
 
@@ -88,27 +99,21 @@ def verify_password(plain: str, password_hash: str) -> bool:
         return False
 
 
-def user_profile(email: str) -> dict:
+def user_profile(email: str) -> Optional[dict]:
+    """Directory profile only — unknown emails are not auto-provisioned."""
     email = (email or "").lower().strip()
     users = load_users()
-    if email in users:
-        p = dict(users[email])
-        p.pop("password_hash", None)
-        p["email"] = email
-        return p
-    return {
-        "email": email,
-        "role": "employee",
-        "teams": [],
-        "identities": [email, email.split("@")[0]],
-        "name": email.split("@")[0],
-        "username": email.split("@")[0],
-    }
+    if email not in users:
+        return None
+    p = dict(users[email])
+    p.pop("password_hash", None)
+    p["email"] = email
+    return p
 
 
 class LoginBody(BaseModel):
-    username: str = Field(min_length=1)
-    password: str = Field(min_length=1)
+    username: str = Field(min_length=1, max_length=120)
+    password: str = Field(min_length=1, max_length=128)
 
 
 # ─────────────────────────── Postgres read ───────────────────────────
@@ -175,9 +180,12 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Digilatics Time Intelligence", lifespan=lifespan)
+# Inner middleware first; SessionMiddleware last = outermost so session exists for CSRF.
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
+    session_cookie="dti_session",
     same_site="lax",
     https_only=COOKIE_SECURE,
     max_age=60 * 60 * 12,
@@ -203,19 +211,40 @@ def require_user(request: Request) -> dict:
     u = current_user(request)
     if not u:
         raise HTTPException(status_code=401, detail="Not signed in")
+    verify_session_binding(request)
+    # Session email must still exist in the directory (revoked users kicked out)
+    if not user_profile(u["email"]):
+        request.session.clear()
+        raise HTTPException(status_code=401, detail="Not signed in")
     return u
+
+
+def require_profile(request: Request) -> dict:
+    u = require_user(request)
+    p = user_profile(u["email"])
+    if not p:
+        request.session.clear()
+        raise HTTPException(401, "Not signed in")
+    return p
 
 
 @app.post("/api/login")
 async def api_login(request: Request, body: LoginBody):
+    ip = client_ip(request)
+    login_key = (body.username or "").strip().lower()
+    login_guard.check(f"ip:{ip}", f"user:{login_key}")
+
     email = resolve_login_identity(body.username)
-    if not email:
+    cfg = load_users().get(email) if email else None
+    ok = bool(email and cfg and verify_password(body.password, cfg.get("password_hash") or ""))
+    if not ok:
+        login_guard.record_failure(f"ip:{ip}", f"user:{login_key}")
         raise HTTPException(401, "Invalid username or password")
-    cfg = load_users().get(email) or {}
-    if not verify_password(body.password, cfg.get("password_hash") or ""):
-        raise HTTPException(401, "Invalid username or password")
+
+    login_guard.record_success(f"ip:{ip}", f"user:{login_key}", f"user:{email}")
     p = user_profile(email)
-    request.session["user"] = {"email": email, "name": p.get("name") or email.split("@")[0]}
+    assert p is not None
+    establish_session(request, email=email, name=p.get("name") or email.split("@")[0])
     return {
         "ok": True,
         "email": p["email"],
@@ -228,10 +257,15 @@ async def api_login(request: Request, body: LoginBody):
 @app.get("/login")
 async def login(request: Request):
     # Password form is on "/". Optional Google OAuth redirect when configured.
-    # DEV_LOGIN ?as= still allowed for local testing only.
+    # DEV_LOGIN ?as= only on localhost — never a shareable login link.
     if DEV_LOGIN and request.query_params.get("as"):
-        who = request.query_params.get("as", "").lower()
-        request.session["user"] = {"email": who, "name": who.split("@")[0]}
+        if not is_local_dev_request(request):
+            raise HTTPException(403, "DEV_LOGIN is local-only")
+        who = request.query_params.get("as", "").lower().strip()
+        p = user_profile(who)
+        if not p:
+            raise HTTPException(403, "Unknown user")
+        establish_session(request, email=who, name=p.get("name") or who.split("@")[0])
         return RedirectResponse("/")
     if "google" in oauth._clients:
         redirect_uri = f"{BASE_URL}/auth"
@@ -248,12 +282,28 @@ async def auth(request: Request):
         raise HTTPException(403, "Email not verified.")
     if ALLOWED_DOMAIN and not email.endswith("@" + ALLOWED_DOMAIN):
         raise HTTPException(403, f"Only @{ALLOWED_DOMAIN} accounts may sign in.")
-    request.session["user"] = {"email": email, "name": info.get("name") or email.split("@")[0]}
+    # Directory allowlist — Google alone is not enough
+    p = user_profile(email)
+    if not p:
+        raise HTTPException(403, "Your account is not provisioned. Ask an admin.")
+    establish_session(
+        request,
+        email=email,
+        name=info.get("name") or p.get("name") or email.split("@")[0],
+    )
     return RedirectResponse("/")
+
+
+@app.post("/api/logout")
+async def api_logout(request: Request):
+    request.session.clear()
+    return JSONResponse({"ok": True})
 
 
 @app.get("/logout")
 async def logout(request: Request):
+    # Prefer POST /api/logout from the UI (CSRF-protected). GET kept for bookmark safety
+    # but only clears when same-site navigations send the cookie.
     request.session.clear()
     return RedirectResponse("/")
 
@@ -262,54 +312,55 @@ async def logout(request: Request):
 async def api_me(request: Request):
     u = require_user(request)
     p = user_profile(u["email"])
+    assert p is not None
     return {
         "email": p["email"],
         "name": u.get("name") or p["name"],
         "role": p["role"],
         "teams": p["teams"],
+        "csrf": request.session.get("csrf"),
     }
 
 
 @app.get("/api/my-data")
 async def api_my_data(request: Request):
     """Time entries for the signed-in user only (My Time page)."""
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     try:
         rows, _ = fetch_all_rows()
-    except Exception as e:
-        raise HTTPException(502, f"Could not read database: {e}")
+    except Exception:
+        logging.exception("api_my_data db read failed")
+        raise HTTPException(502, "Could not read database")
     return JSONResponse(scope_rows_own(rows, p))
 
 
 @app.get("/api/data")
 async def api_data(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     try:
         rows, _ = fetch_all_rows()
-    except Exception as e:
-        raise HTTPException(502, f"Could not read database: {e}")
+    except Exception:
+        logging.exception("api_data db read failed")
+        raise HTTPException(502, "Could not read database")
     return JSONResponse(scope_rows(rows, p))
 
 
 @app.get("/api/live/today")
 async def api_live_today(request: Request, force: bool = False):
     """Today's hours — live ClickUp time + Meet rows from DB (30m cache). ?force=1 bypasses cache."""
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     try:
         from ingest.live_today import live_today_payload
 
         return JSONResponse(live_today_payload(p, force=force))
-    except Exception as e:
-        raise HTTPException(502, f"Could not load live today stats: {e}")
+    except Exception:
+        logging.exception("api_live_today failed")
+        raise HTTPException(502, "Could not load live today stats")
 
 
 @app.get("/api/active-timers")
 async def api_timers(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     try:
         _, timers = fetch_all_rows()
     except Exception:
@@ -331,8 +382,7 @@ async def api_timers(request: Request):
 @app.get("/api/sync/status")
 async def api_sync_status(request: Request):
     """Admin-only recent sync runs."""
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     if p["role"] != "admin":
         raise HTTPException(403, "Admin only")
     from sqlalchemy import select
@@ -360,24 +410,24 @@ async def api_sync_status(request: Request):
 @app.post("/api/sync/{job}")
 async def api_sync_trigger(job: str, request: Request):
     """Admin-only manual sync trigger: clickup | meet | sheet_import."""
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     if p["role"] != "admin":
         raise HTTPException(403, "Admin only")
+    if job not in {"clickup", "meet", "sheet_import"}:
+        raise HTTPException(404, "Unknown job")
     if job == "clickup":
         from ingest.clickup import run_sync
     elif job == "meet":
         from ingest.meet import run_sync
-    elif job == "sheet_import":
-        from ingest.import_sheet import run_import as run_sync
     else:
-        raise HTTPException(404, "Unknown job")
+        from ingest.import_sheet import run_import as run_sync
     try:
         debug = run_sync()
         _cache["data"] = None  # bust cache
         return {"ok": True, "debug": debug}
-    except Exception as e:
-        raise HTTPException(502, str(e))
+    except Exception:
+        logging.exception("sync job %s failed", job)
+        raise HTTPException(502, "Sync failed")
 
 
 # ─────────────────────────── settings / admin directory ───────────────────────────
@@ -395,10 +445,10 @@ class UpdateClientBody(BaseModel):
 
 
 class AddUserBody(BaseModel):
-    email: str = Field(min_length=3)
+    email: str = Field(min_length=3, max_length=200)
     name: str = Field(min_length=2, max_length=120)
     username: str = Field(min_length=2, max_length=64)
-    password: str = Field(min_length=6, max_length=128)
+    password: str = Field(min_length=10, max_length=128)
     role: str = "employee"
     teams: str = ""
     identities: str = ""
@@ -432,8 +482,7 @@ def _split_csv(s: str) -> list[str]:
 
 @app.get("/api/settings/meta")
 async def api_settings_meta(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     from settings_store import list_team_options, list_clients_public, list_users_public
 
     meta = {
@@ -447,8 +496,7 @@ async def api_settings_meta(request: Request):
 
 @app.get("/api/settings/profile")
 async def api_settings_profile(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     return JSONResponse(
         {
             "email": p["email"],
@@ -472,8 +520,10 @@ async def api_settings_profile_update(request: Request, body: ProfileUpdateBody)
     if body.new_password:
         if not body.current_password or not verify_password(body.current_password, cfg.get("password_hash") or ""):
             raise HTTPException(400, "Current password is incorrect")
-        if len(body.new_password) < 6:
-            raise HTTPException(400, "New password must be at least 6 characters")
+        try:
+            validate_password_strength(body.new_password)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
 
     from settings_store import update_profile
 
@@ -486,18 +536,19 @@ async def api_settings_profile_update(request: Request, body: ProfileUpdateBody)
     except ValueError as e:
         raise HTTPException(400, str(e))
 
-    if body.name:
-        users = load_users()
-        if email in users:
-            users[email]["name"] = body.name.strip()
+    # Keep display name in session in sync (does not change data-access identities)
+    if body.name is not None:
+        name = body.name.strip()
+        sess = request.session.get("user") or {}
+        sess["name"] = name
+        request.session["user"] = sess
 
     return JSONResponse({"ok": True, "profile": updated})
 
 
 @app.get("/api/admin/clients")
 async def api_admin_clients(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from settings_store import list_clients_public
 
@@ -506,8 +557,7 @@ async def api_admin_clients(request: Request):
 
 @app.post("/api/admin/clients")
 async def api_admin_clients_add(request: Request, body: AddClientBody):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from settings_store import add_client
 
@@ -524,8 +574,7 @@ async def api_admin_clients_add(request: Request, body: AddClientBody):
 
 @app.patch("/api/admin/clients")
 async def api_admin_clients_update(request: Request, body: UpdateClientBody):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from settings_store import update_client
 
@@ -543,8 +592,7 @@ async def api_admin_clients_update(request: Request, body: UpdateClientBody):
 
 @app.delete("/api/admin/clients")
 async def api_admin_clients_delete(request: Request, name: str):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from settings_store import delete_client
 
@@ -557,8 +605,7 @@ async def api_admin_clients_delete(request: Request, name: str):
 
 @app.get("/api/admin/users")
 async def api_admin_users(request: Request):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from settings_store import list_users_public
 
@@ -567,9 +614,12 @@ async def api_admin_users(request: Request):
 
 @app.post("/api/admin/users")
 async def api_admin_users_add(request: Request, body: AddUserBody):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
+    try:
+        validate_password_strength(body.password)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
     from settings_store import add_user
 
     try:
@@ -589,8 +639,7 @@ async def api_admin_users_add(request: Request, body: AddUserBody):
 
 @app.post("/api/admin/predict-identities")
 async def api_predict_identities(request: Request, body: PredictIdentitiesBody):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     _require_admin(p)
     from identity_predict import predict_identities
 
@@ -619,8 +668,7 @@ async def api_chat_status(request: Request):
 
 @app.post("/api/chat")
 async def api_chat(request: Request, body: ChatMessageBody):
-    u = require_user(request)
-    p = user_profile(u["email"])
+    p = require_profile(request)
     from chat_assistant import answer_chat
 
     try:
@@ -629,8 +677,9 @@ async def api_chat(request: Request, body: ChatMessageBody):
             message=body.message.strip(),
             history=body.history[-8:],
         )
-    except Exception as e:
-        raise HTTPException(502, f"Chat failed: {e}")
+    except Exception:
+        logging.exception("chat failed")
+        raise HTTPException(502, "Chat failed")
     return JSONResponse(result)
 
 

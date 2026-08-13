@@ -173,7 +173,8 @@ def _merge_users_json_employees(
         e = str(email).lower().strip()
         name = str(cfg.get("name") or "").strip()
         if name:
-            email_name.setdefault(e, name)
+            # Prefer dashboard directory name over stale workbook short names
+            email_name[e] = name
         email_fallback.setdefault(e, "Digilatics")
         teams = cfg.get("teams") or []
         if teams and str(teams[0]).strip():

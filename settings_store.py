@@ -219,6 +219,9 @@ def add_user(
         if v and v.lower() not in {i.lower() for i in idents}:
             idents.append(v)
 
+    from security import validate_password_strength
+
+    validate_password_strength(password)
     pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     entry: dict = {
         "role": role,
@@ -246,18 +249,13 @@ def update_profile(*, email: str, name: str | None = None, new_password: str | N
         name = name.strip()
         if len(name) < 2:
             raise ValueError("Name is too short")
+        # Display name only — do NOT append to identities (prevents IDOR / data spoofing)
         cfg["name"] = name
-        idents = list(cfg.get("identities") or [])
-        if name not in idents:
-            idents.append(name)
-        first = name.split()[0] if name.split() else ""
-        if first and first not in idents:
-            idents.append(first)
-        cfg["identities"] = idents
 
     if new_password:
-        if len(new_password) < 6:
-            raise ValueError("Password must be at least 6 characters")
+        from security import validate_password_strength
+
+        validate_password_strength(new_password)
         cfg["password_hash"] = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     raw[email] = cfg
