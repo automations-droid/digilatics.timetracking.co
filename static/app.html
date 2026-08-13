@@ -1959,11 +1959,43 @@ async function loadSyncStatus(){
     host.innerHTML=
       '<div class="section-label">Sync Status</div>'+
       '<div class="detail-card"><div class="card-header"><div><div class="table-title">Recent Sync Runs</div><div class="table-sub">ClickUp + Meet ingest jobs</div></div>'+
-      '<div class="card-controls"><button class="refresh-btn" style="padding:7px 12px;font-size:12px" onclick="triggerSync(\'clickup\')">Run ClickUp</button>'+
-      '<button class="refresh-btn" style="padding:7px 12px;font-size:12px;margin-left:8px" onclick="triggerSync(\'meet\')">Run Meet</button></div></div>'+
+      '<div class="card-controls" style="flex-wrap:wrap;gap:8px">'+
+        '<button class="refresh-btn" style="padding:7px 12px;font-size:12px;background:linear-gradient(135deg,#ff6b2b,#ff8f4a);color:#fff;border-color:transparent" onclick="triggerSyncToday()">&#8635; Resync Today (Everyone)</button>'+
+        '<button class="refresh-btn" style="padding:7px 12px;font-size:12px" onclick="triggerSync(\'clickup\')">Run ClickUp</button>'+
+        '<button class="refresh-btn" style="padding:7px 12px;font-size:12px" onclick="triggerSync(\'meet\')">Run Meet</button>'+
+      '</div></div>'+
       '<div class="table-wrap"><table><thead><tr><th>Job</th><th>Status</th><th>Rows</th><th>Started</th><th>Finished</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   }catch(e){
     host.innerHTML='<div class="section-label">Sync Status</div><div class="loading">Could not load sync status.</div>';
+  }
+}
+async function triggerSyncToday(){
+  if(!confirm('Re-pull ClickUp time + Google Meet for TODAY (ET) for everyone and update the database?')) return;
+  showResyncOverlay(true);
+  const overlayText=document.querySelector('.resync-overlay-text');
+  if(overlayText)overlayText.textContent='Resyncing today for everyone…';
+  try{
+    const res=await apiFetch('/api/sync/today',{method:'POST',credentials:'same-origin'});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){
+      alert(data.detail||('Resync failed: '+res.status));
+      return;
+    }
+    const d=data.debug||{};
+    const cu=d.clickup||{}, mt=d.meet||{};
+    alert(
+      'Today resync ok ('+(d.day||'')+')\n'+
+      'Users: '+(d.users??'?')+'\n'+
+      'ClickUp upserted: '+(cu.rowsUpserted??'?')+' · deleted: '+(cu.rowsDeleted??'?')+'\n'+
+      'Meet inserted: '+(mt.rowsInserted??mt.totalNewMeetings??'?')+' · deleted: '+(mt.rowsDeleted??'?')
+    );
+    await Promise.all([loadSyncStatus(), loadData(), loadLiveToday(true)]);
+  }catch(e){
+    alert('Resync failed. Try again.');
+    console.error(e);
+  }finally{
+    showResyncOverlay(false);
+    if(overlayText)overlayText.textContent='Syncing today\u2019s time\u2026';
   }
 }
 async function triggerSync(job){

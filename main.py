@@ -409,19 +409,33 @@ async def api_sync_status(request: Request):
 
 @app.post("/api/sync/{job}")
 async def api_sync_trigger(job: str, request: Request):
-    """Admin-only manual sync trigger: clickup | meet | sheet_import."""
+    """Admin-only manual sync: clickup | meet | sheet_import | today."""
     p = require_profile(request)
     if p["role"] != "admin":
         raise HTTPException(403, "Admin only")
-    if job not in {"clickup", "meet", "sheet_import"}:
+    if job not in {"clickup", "meet", "sheet_import", "today"}:
         raise HTTPException(404, "Unknown job")
-    if job == "clickup":
-        from ingest.clickup import run_sync
-    elif job == "meet":
-        from ingest.meet import run_sync
-    else:
-        from ingest.import_sheet import run_import as run_sync
     try:
+        if job == "today":
+            from ingest.resync_today import run_resync_today_everyone
+
+            debug = run_resync_today_everyone()
+            # Bust live + dashboard caches so UI reflects DB immediately
+            _cache["data"] = None
+            try:
+                from ingest import live_today as lt
+
+                lt._cache = {"ts": 0.0, "day": "", "clickup": None, "meet": None}
+                lt._user_live_cache = {}
+            except Exception:
+                logging.exception("could not clear live_today cache")
+            return {"ok": True, "debug": debug}
+        if job == "clickup":
+            from ingest.clickup import run_sync
+        elif job == "meet":
+            from ingest.meet import run_sync
+        else:
+            from ingest.import_sheet import run_import as run_sync
         debug = run_sync()
         _cache["data"] = None  # bust cache
         return {"ok": True, "debug": debug}
