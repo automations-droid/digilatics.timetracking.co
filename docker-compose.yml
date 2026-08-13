@@ -40,10 +40,13 @@ services:
       - ./clients.json:/app/clients.json
       - ./static:/app/static:ro
       - ./main.py:/app/main.py:ro
+      - ./security.py:/app/security.py:ro
       - ./settings_store.py:/app/settings_store.py:ro
       - ./local_llm.py:/app/local_llm.py:ro
       - ./identity_predict.py:/app/identity_predict.py:ro
       - ./chat_assistant.py:/app/chat_assistant.py:ro
+      - ./claude_match.py:/app/claude_match.py:ro
+      - ./matching.py:/app/matching.py:ro
       - ./db.py:/app/db.py:ro
       - ./ingest:/app/ingest:ro
       - ./scripts:/app/scripts:ro

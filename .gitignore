@@ -7,8 +7,11 @@ users.json
 pgdata/
 .pgdata/
 exports/
+backups/
 *.xlsx
+*.dump
 .DS_Store
 cloudflared
 docker.tgz
 /tmp/
+static/login-art.png
