@@ -151,6 +151,26 @@ def scope_rows_own(rows, profile: dict):
     return [r for r in rows if str(r.get("User", "")).lower() in idents]
 
 
+def _lead_roster_idents(teams: set[str]) -> set[str]:
+    """Users.json members assigned to any of the lead's teams (by name/email/ids)."""
+    if not teams:
+        return set()
+    out: set[str] = set()
+    for email, cfg in load_users().items():
+        user_teams = {str(t).lower().strip() for t in (cfg.get("teams") or []) if str(t).strip()}
+        if not (user_teams & teams):
+            continue
+        out.add(email.lower().strip())
+        out.update(str(i).lower().strip() for i in (cfg.get("identities") or []) if str(i).strip())
+        name = str(cfg.get("name") or "").lower().strip()
+        if name:
+            out.add(name)
+        username = str(cfg.get("username") or "").lower().strip()
+        if username:
+            out.add(username)
+    return out
+
+
 def scope_rows(rows, profile: dict):
     role = profile["role"]
     if role == "admin":
@@ -158,10 +178,15 @@ def scope_rows(rows, profile: dict):
     if role == "lead":
         teams = {t.lower() for t in profile["teams"]}
         idents = set(profile["identities"])
+        roster = _lead_roster_idents(teams)
+        # Own rows always; team rows only for roster members (avoids mis-tagged outsiders).
         return [
             r for r in rows
-            if str(r.get("Team", "")).lower() in teams
-            or str(r.get("User", "")).lower() in idents
+            if str(r.get("User", "")).lower() in idents
+            or (
+                str(r.get("Team", "")).lower() in teams
+                and str(r.get("User", "")).lower() in roster
+            )
         ]
     idents = set(profile["identities"])
     return [r for r in rows if str(r.get("User", "")).lower() in idents]
@@ -368,13 +393,7 @@ async def api_timers(request: Request):
     if p["role"] == "admin":
         return JSONResponse(timers)
     if p["role"] == "lead":
-        teams = {t.lower() for t in p["teams"]}
-        idents = set(p["identities"])
-        return JSONResponse([
-            t for t in timers
-            if str(t.get("Team", "")).lower() in teams
-            or str(t.get("User", "")).lower() in idents
-        ])
+        return JSONResponse(scope_rows(timers, p))
     idents = set(p["identities"])
     return JSONResponse([t for t in timers if str(t.get("User", "")).lower() in idents])
 
