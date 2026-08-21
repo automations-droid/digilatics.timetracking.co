@@ -21,6 +21,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .app{max-width:none;width:100%;margin:0;padding:0;}
 /* ── App shell ── */
 .shell{display:flex;min-height:100vh;width:100%;}
+/* Hidden until boot() confirms an authenticated session — prevents the
+   dashboard shell from flashing on screen before the login gate resolves. */
+#appShell{display:none;}
+#appShell.is-authed{display:flex;}
+#bootGate{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:9999;}
+#bootGate.hidden{display:none;}
+#bootGate .boot-spin{width:28px;height:28px;border-radius:50%;border:3px solid #ececec;border-top-color:#ff6b2b;animation:bootSpin .7s linear infinite;}
+@keyframes bootSpin{to{transform:rotate(360deg);}}
 .sidebar{width:248px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:100;}
 .sidebar-brand{display:flex;align-items:center;gap:12px;padding:0 18px;min-height:72px;height:72px;border-bottom:1px solid var(--border);box-sizing:border-box;}
 .sidebar-brand .brand-mark{width:38px;height:38px;background:#2a2621;border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(255,107,43,0.35);flex-shrink:0;overflow:hidden;}
@@ -533,6 +541,7 @@ tbody td{padding:11px 14px;color:var(--text2);}
 </style>
 </head>
 <body>
+<div id="bootGate"><div class="boot-spin"></div></div>
 <div id="g-tip"></div>
 <div class="app shell" id="appShell">
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeNav()"></div>
@@ -1326,6 +1335,7 @@ async function refreshAll(){
 
 /* ── Load Active Timers ── */
 async function loadActiveTimers(){
+  if(!ME||ME.role!=='admin'){activeTimerData=[];return;}
   try{
     const res=await apiFetch('/api/active-timers',{credentials:'same-origin'});
     if(!res.ok)throw new Error('timers '+res.status);
@@ -1376,12 +1386,15 @@ function renderCurrentView(){
 }
 
 /* ── Auth boot ── */
+function hideBootGate(){document.getElementById('bootGate')?.classList.add('hidden');}
 async function boot(){
   try{
     const res=await apiFetch('/api/me',{credentials:'same-origin'});
-    if(res.status===401){showLogin();return;}
+    if(res.status===401){hideBootGate();showLogin();return;}
     ME=await res.json();
-  }catch(e){showLogin();return;}
+  }catch(e){hideBootGate();showLogin();return;}
+  document.getElementById('appShell').classList.add('is-authed');
+  hideBootGate();
   // paint sidebar user
   const sidebarUser=document.getElementById('sidebarUser');
   const chip=document.getElementById('userChip');
@@ -1532,7 +1545,7 @@ function startLoginStage(root){
 }
 
 function showLogin(){
-  document.getElementById('appShell').style.display='none';
+  document.getElementById('appShell').classList.remove('is-authed');
   stopLoginBg();
   document.getElementById('loginScreen')?.remove();
   const params=new URLSearchParams(location.search);
@@ -1602,7 +1615,6 @@ function showLogin(){
       }
       stopLoginBg();
       document.getElementById('loginScreen')?.remove();
-      document.getElementById('appShell').style.display='';
       await boot();
     }catch(e){
       errEl.textContent='Could not sign in. Try again.';
@@ -1661,8 +1673,9 @@ function top5Rows(arr){if(!arr.length)return '<div class="panel-empty">No data</
 function buildTop5Html(data){const ms=applySrc(data,CS.top5Most.src),ls=applySrc(data,CS.top5Least.src),bs=applySrc(data,CS.top5Mbr.src);const cm=groupSum(ms,'Client'),cl=groupSum(ls,'Client'),uh=groupSum(bs,'User');const sm=Object.entries(cm).sort((a,b)=>b[1]-a[1]),sl=Object.entries(cl).sort((a,b)=>a[1]-b[1]);const sb=Object.entries(uh).sort((a,b)=>b[1]-a[1]);return '<div class="top5-grid" id="top5-grid"><div class="top5-card"><div class="top5-card-header"><div><div class="top5-card-title">&#128293; Most Active Clients</div><div class="top5-card-sub">Highest hours logged</div></div><div class="card-controls" id="ctrl-top5Most">'+mkSrcBtns('top5Most')+'</div></div><div class="top5-body" id="top5-body-Most">'+top5Rows(sm.slice(0,5))+'</div></div><div class="top5-card"><div class="top5-card-header"><div><div class="top5-card-title">&#128078; Least Active Clients</div><div class="top5-card-sub">Lowest hours logged</div></div><div class="card-controls" id="ctrl-top5Least">'+mkSrcBtns('top5Least')+'</div></div><div class="top5-body" id="top5-body-Least">'+top5Rows(sl.slice(0,5))+'</div></div><div class="top5-card"><div class="top5-card-header"><div><div class="top5-card-title">&#127942; Top 5 Members</div><div class="top5-card-sub">Highest hours logged</div></div><div class="card-controls" id="ctrl-top5Mbr">'+mkSrcBtns('top5Mbr')+'</div></div><div class="top5-body" id="top5-body-Mbr">'+top5Rows(sb.slice(0,5))+'</div></div></div>';}
 function updateTop5(){const data=getFiltered();if(!document.getElementById('top5-grid'))return;const ms=applySrc(data,CS.top5Most.src),ls=applySrc(data,CS.top5Least.src),bs=applySrc(data,CS.top5Mbr.src);const cm=groupSum(ms,'Client'),cl=groupSum(ls,'Client'),uh=groupSum(bs,'User');const sm=Object.entries(cm).sort((a,b)=>b[1]-a[1]),sl=Object.entries(cl).sort((a,b)=>a[1]-b[1]);const sb=Object.entries(uh).sort((a,b)=>b[1]-a[1]);const b1=document.getElementById('top5-body-Most');if(b1)b1.innerHTML=top5Rows(sm.slice(0,5));const b2=document.getElementById('top5-body-Least');if(b2)b2.innerHTML=top5Rows(sl.slice(0,5));const b3=document.getElementById('top5-body-Mbr');if(b3)b3.innerHTML=top5Rows(sb.slice(0,5));}
 
-/* ── Active Timers ── */
+/* ── Active Timers (admin only) ── */
 function buildTimersHtml(){
+  if(!ME||ME.role!=='admin')return '';
   if(!activeTimerData.length)return '<div class="split-bar-card" style="margin-bottom:0;flex-direction:column;align-items:flex-start;gap:8px;padding:12px 20px;"><div style="display:flex;align-items:center;gap:10px;width:100%"><span style="font-size:13px;font-weight:700;color:var(--text)">&#9201; Active Timers</span><span style="font-size:11px;color:var(--text3)">No active timers right now</span></div></div>';
   const n=activeTimerData.length;
   const userSet=[...new Set(activeTimerData.map(r=>r.User||'Unknown'))];
@@ -1792,7 +1805,7 @@ function renderMyTimeView(){
       '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Daily Hours</div><div class="chart-sub">Your hours per day &middot; Tasks &amp; Meetings</div></div></div><div class="chart-wrap"><canvas id="empDaily"></canvas></div></div>'+
       (showClients
         ? '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Hours by Client</div><div class="chart-sub">Where your time went</div></div></div><div class="chart-wrap"><canvas id="empClient"></canvas></div></div>'
-        : comingSoonBlock('Hours by Client','Coming soon for your role'))+
+        : '')+
     '</div></div>'+
     '<div class="page-section" id="sec-entries">'+
     '<div class="section-label">My Activity</div>'+
@@ -1873,10 +1886,11 @@ function renderDashboard(){
   const showClients=canSeeClients();
   const clientSub=includeDigilatics?'Tasks &amp; Meetings per client &middot; internal Digilatics shown below':'Client billable hours only &middot; Digilatics internal excluded';
   const clientsMetric=showClients?mc('Clients',Object.keys(ch).length,'Active this period'):mc('Clients','—','Coming soon');
-  const top5Html=showClients?buildTop5Html(data):comingSoonBlock('Client Leaderboards','Most / least active clients — Coming soon');
+  // Client leaderboards + active timers: admin only (no Coming soon placeholders for leads/employees)
+  const top5Html=showClients?buildTop5Html(data):'';
   const clientChartHtml=showClients
     ? '<div class="chart-card"><div class="chart-card-header"><div><div class="chart-title">Client Leaderboard</div><div class="chart-sub">'+clientSub+'</div></div><div class="card-controls" id="ctrl-chartClient">'+ctrlChClient+'</div></div><div class="chart-wrap"><canvas id="cBar"></canvas></div></div>'
-    : comingSoonBlock('Client Leaderboard','Coming soon for leads &amp; employees');
+    : '';
   const thClients=showClients?'<th>Clients</th>':'<!-- <th>Clients</th> -->';
   const thClientCol=showClients?thSort('client','Client'):'<!-- client col -->';
 
